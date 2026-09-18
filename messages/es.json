@@ -1,0 +1,146 @@
+{
+  "app": {
+    "name": "Orthiva",
+    "tagline": "Planeación y gestión de alineadores dentales",
+    "loading": "Cargando…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "close": "Cerrar",
+    "back": "Volver",
+    "continue": "Continuar",
+    "actions": "Acciones",
+    "comingSoon": "Próximamente",
+    "error": "Ocurrió un error",
+    "saved": "Cambios guardados"
+  },
+  "auth": {
+    "signIn": "Ingresar",
+    "signOut": "Cerrar sesión",
+    "redirectNotice": "Serás redirigido al inicio de sesión seguro.",
+    "authError": "Error de autenticación: {message}"
+  },
+  "language": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English"
+  },
+  "nav": {
+    "dashboard": "Inicio",
+    "patients": "Pacientes",
+    "clinics": "Clínicas",
+    "orders": "Órdenes",
+    "newOrder": "Nueva prescripción",
+    "labOrders": "Bandeja de órdenes",
+    "production": "Producción",
+    "myTreatment": "Mi tratamiento",
+    "users": "Usuarios",
+    "profile": "Mi perfil"
+  },
+  "roles": {
+    "ADMIN": "Administrador",
+    "DOCTOR": "Doctor",
+    "PATIENT": "Paciente",
+    "LAB": "Laboratorio",
+    "PLANNER": "Planeador",
+    "PRODUCTION": "Producción",
+    "ACCOUNTING": "Contabilidad",
+    "REPRESENTATIVE": "Representante"
+  },
+  "dashboard": {
+    "welcome": "Hola, {name}",
+    "roleLabel": "Rol",
+    "tenantLabel": "Laboratorio",
+    "doctor": {
+      "title": "Panel del doctor",
+      "patients": "Gestiona tus pacientes y sus fichas.",
+      "orders": "Crea prescripciones y sigue el estado de tus órdenes.",
+      "clinics": "Registra tus consultorios y direcciones de envío."
+    },
+    "lab": {
+      "title": "Panel del laboratorio",
+      "orders": "Órdenes recibidas pendientes de planeación.",
+      "production": "Cola de producción y envíos."
+    },
+    "patient": {
+      "title": "Mi tratamiento",
+      "treatment": "Consulta tu plan de tratamiento y su evolución."
+    },
+    "admin": {
+      "title": "Administración",
+      "users": "Crea usuarios internos del laboratorio."
+    }
+  },
+  "onboarding": {
+    "title": "Completa tu registro",
+    "subtitle": "Cuéntanos quién eres para configurar tu cuenta.",
+    "iAmDoctor": "Soy doctor / odontólogo",
+    "iAmDoctorHint": "Prescribo tratamientos y envío casos al laboratorio.",
+    "iAmPatient": "Soy paciente",
+    "iAmPatientHint": "Quiero seguir mi tratamiento.",
+    "submit": "Finalizar registro",
+    "success": "Registro completado. Actualizando tu sesión…",
+    "refreshHint": "Si la pantalla no cambia, vuelve a iniciar sesión."
+  },
+  "profile": {
+    "title": "Mi perfil",
+    "personal": "Datos personales",
+    "contact": "Contacto",
+    "professional": "Datos profesionales",
+    "address": "Dirección",
+    "firstName": "Nombres",
+    "lastName": "Apellidos",
+    "gender": "Género",
+    "genderF": "Femenino",
+    "genderM": "Masculino",
+    "genderX": "Otro / prefiero no decir",
+    "documentId": "Documento de identidad",
+    "birthDate": "Fecha de nacimiento",
+    "phoneCountry": "Indicativo",
+    "phoneNumber": "Celular",
+    "locale": "Idioma preferido",
+    "specialty": "Especialidad",
+    "licenseNumber": "Número de licencia / tarjeta profesional",
+    "licenseCountry": "País que emite la licencia",
+    "licenseHint": "Colombia: tarjeta profesional / ReTHUS · México: cédula profesional · Brasil: CRO · España: nº de colegiado · EE. UU.: licencia estatal.",
+    "verified": "Licencia verificada por el laboratorio",
+    "notVerified": "Licencia pendiente de verificación",
+    "country": "País",
+    "stateProvince": "Departamento / estado",
+    "city": "Ciudad",
+    "postalCode": "Código postal",
+    "line1": "Dirección",
+    "line2": "Complemento",
+    "reference": "Referencia"
+  },
+  "adminUsers": {
+    "title": "Usuarios internos",
+    "subtitle": "Personal del laboratorio con acceso a la plataforma.",
+    "new": "Nuevo usuario",
+    "email": "Correo",
+    "name": "Nombre",
+    "role": "Rol",
+    "status": "Estado",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "temporaryPassword": "Clave temporal",
+    "temporaryPasswordHint": "El usuario deberá cambiarla en su primer ingreso.",
+    "created": "Usuario creado. Comparte la clave temporal de forma segura.",
+    "empty": "Aún no hay usuarios internos."
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "email": "Correo inválido",
+    "minLength": "Mínimo {min} caracteres",
+    "country": "Usa el código de dos letras (CO, MX, US…)"
+  },
+  "errors": {
+    "license_required": "Los doctores deben indicar su número de licencia.",
+    "license_country_required": "Indica el país que emite la licencia.",
+    "user_exists": "Ya existe un usuario con ese correo.",
+    "already_onboarded": "Tu perfil ya fue creado.",
+    "forbidden": "No tienes permiso para esta acción.",
+    "not_found": "No encontrado.",
+    "generic": "No se pudo completar la operación."
+  }
+}

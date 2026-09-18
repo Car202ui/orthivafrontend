@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored oidc-client-ts browser bundle used by public/silent-renew.html
+    "public/oidc-client-ts.min.js",
   ]),
 ]);
 

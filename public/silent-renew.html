@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>silent renew</title>
+  </head>
+  <body>
+    <!-- Loaded by oidc-client-ts inside a hidden iframe to refresh the access token without
+         reloading the app. Hands the authorization response back to the parent window. -->
+    <script src="/oidc-client-ts.min.js"></script>
+    <script>
+      new oidc.UserManager({ response_mode: "query" }).signinSilentCallback().catch(function (e) {
+        console.error("silent renew failed", e);
+      });
+    </script>
+  </body>
+</html>

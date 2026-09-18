@@ -1,0 +1,146 @@
+{
+  "app": {
+    "name": "Orthiva",
+    "tagline": "Clear aligner planning and case management",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "actions": "Actions",
+    "comingSoon": "Coming soon",
+    "error": "Something went wrong",
+    "saved": "Changes saved"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "redirectNotice": "You will be redirected to the secure sign-in page.",
+    "authError": "Authentication error: {message}"
+  },
+  "language": {
+    "label": "Language",
+    "es": "Español",
+    "en": "English"
+  },
+  "nav": {
+    "dashboard": "Home",
+    "patients": "Patients",
+    "clinics": "Clinics",
+    "orders": "Orders",
+    "newOrder": "New prescription",
+    "labOrders": "Order inbox",
+    "production": "Production",
+    "myTreatment": "My treatment",
+    "users": "Users",
+    "profile": "My profile"
+  },
+  "roles": {
+    "ADMIN": "Administrator",
+    "DOCTOR": "Doctor",
+    "PATIENT": "Patient",
+    "LAB": "Laboratory",
+    "PLANNER": "Planner",
+    "PRODUCTION": "Production",
+    "ACCOUNTING": "Accounting",
+    "REPRESENTATIVE": "Representative"
+  },
+  "dashboard": {
+    "welcome": "Hello, {name}",
+    "roleLabel": "Role",
+    "tenantLabel": "Laboratory",
+    "doctor": {
+      "title": "Doctor dashboard",
+      "patients": "Manage your patients and their records.",
+      "orders": "Create prescriptions and track your orders.",
+      "clinics": "Register your clinics and shipping addresses."
+    },
+    "lab": {
+      "title": "Laboratory dashboard",
+      "orders": "Received orders waiting for planning.",
+      "production": "Production queue and shipments."
+    },
+    "patient": {
+      "title": "My treatment",
+      "treatment": "Review your treatment plan and progress."
+    },
+    "admin": {
+      "title": "Administration",
+      "users": "Create internal laboratory users."
+    }
+  },
+  "onboarding": {
+    "title": "Complete your registration",
+    "subtitle": "Tell us who you are so we can set up your account.",
+    "iAmDoctor": "I am a doctor / dentist",
+    "iAmDoctorHint": "I prescribe treatments and send cases to the lab.",
+    "iAmPatient": "I am a patient",
+    "iAmPatientHint": "I want to follow my treatment.",
+    "submit": "Finish registration",
+    "success": "Registration complete. Refreshing your session…",
+    "refreshHint": "If the screen does not change, sign in again."
+  },
+  "profile": {
+    "title": "My profile",
+    "personal": "Personal details",
+    "contact": "Contact",
+    "professional": "Professional details",
+    "address": "Address",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "gender": "Gender",
+    "genderF": "Female",
+    "genderM": "Male",
+    "genderX": "Other / prefer not to say",
+    "documentId": "ID document",
+    "birthDate": "Date of birth",
+    "phoneCountry": "Country code",
+    "phoneNumber": "Mobile",
+    "locale": "Preferred language",
+    "specialty": "Specialty",
+    "licenseNumber": "License number",
+    "licenseCountry": "Issuing country",
+    "licenseHint": "Colombia: tarjeta profesional / ReTHUS · Mexico: cédula profesional · Brazil: CRO · Spain: colegiado nº · USA: state dental license.",
+    "verified": "License verified by the laboratory",
+    "notVerified": "License pending verification",
+    "country": "Country",
+    "stateProvince": "State / province",
+    "city": "City",
+    "postalCode": "Postal code",
+    "line1": "Address",
+    "line2": "Address line 2",
+    "reference": "Reference"
+  },
+  "adminUsers": {
+    "title": "Internal users",
+    "subtitle": "Laboratory staff with access to the platform.",
+    "new": "New user",
+    "email": "Email",
+    "name": "Name",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "temporaryPassword": "Temporary password",
+    "temporaryPasswordHint": "The user must change it on first sign-in.",
+    "created": "User created. Share the temporary password securely.",
+    "empty": "No internal users yet."
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Invalid email",
+    "minLength": "At least {min} characters",
+    "country": "Use the two-letter code (CO, MX, US…)"
+  },
+  "errors": {
+    "license_required": "Doctors must provide a license number.",
+    "license_country_required": "Provide the country that issued the license.",
+    "user_exists": "A user with that email already exists.",
+    "already_onboarded": "Your profile already exists.",
+    "forbidden": "You are not allowed to do this.",
+    "not_found": "Not found.",
+    "generic": "The operation could not be completed."
+  }
+}
