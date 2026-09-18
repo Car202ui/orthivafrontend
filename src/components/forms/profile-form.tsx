@@ -142,7 +142,11 @@ export function ProfileForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("profile.gender")}</FormLabel>
-                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                  <Select
+                    items={{ F: t("profile.genderF"), M: t("profile.genderM"), X: t("profile.genderX") }}
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="—" />
@@ -164,7 +168,7 @@ export function ProfileForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("profile.locale")}</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select items={{ es: t("language.es"), en: t("language.en") }} value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue />

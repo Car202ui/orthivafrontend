@@ -28,7 +28,7 @@ function navFor(roles: string[]): NavItem[] {
     items.push(
       { href: "/doctor/patients", labelKey: "patients", ready: true },
       { href: "/doctor/clinics", labelKey: "clinics", ready: true },
-      { href: "/doctor/orders", labelKey: "orders", ready: false },
+      { href: "/doctor/orders", labelKey: "orders", ready: true },
     );
   }
   if (roles.some((r) => ["LAB", "PLANNER"].includes(r))) {

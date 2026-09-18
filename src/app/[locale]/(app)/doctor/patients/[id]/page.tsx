@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "@/i18n/navigation";
-import { ApiError, type Patient, type PatientInput } from "@/lib/api";
+import { OrderStatusBadge } from "@/components/orders/status-badge";
+import { ApiError, type Order, type Patient, type PatientInput } from "@/lib/api";
 import { parseLocalDate } from "@/lib/dates";
 import { useApi } from "@/lib/query";
 
@@ -32,6 +33,7 @@ export default function PatientRecordPage() {
   const [editing, setEditing] = useState(false);
 
   const patient = useQuery({ queryKey: ["patients", "one", id], queryFn: () => call<Patient>(`/api/patients/${id}`) });
+  const orders = useQuery({ queryKey: ["orders", "patient", id], queryFn: () => call<Order[]>(`/api/orders?patientId=${id}`) });
 
   const update = useMutation({
     mutationFn: (input: PatientInput) => call<Patient>(`/api/patients/${id}`, { method: "PUT", body: JSON.stringify(input) }),
@@ -88,14 +90,26 @@ export default function PatientRecordPage() {
           </CardContent>
         </Card>
 
-        <Card className="opacity-70">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               {t("patients.orders")}
-              <Badge variant="outline">{t("app.comingSoon")}</Badge>
+              <Link href={`/doctor/orders/new?patientId=${p.id}`}>
+                <Button size="sm">{t("orders.new")}</Button>
+              </Link>
             </CardTitle>
-            <CardDescription>{t("patients.ordersSoon")}</CardDescription>
+            <CardDescription>{orders.data?.length === 0 ? t("orders.empty") : null}</CardDescription>
           </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {orders.data?.map((o) => (
+              <Link key={o.id} href={`/doctor/orders/${o.id}`} className="flex items-center justify-between rounded-md border p-3 hover:bg-muted">
+                <span>
+                  #{o.orderNumber} · {t(`orders.form.arch${o.arch}`)}
+                </span>
+                <OrderStatusBadge status={o.status} />
+              </Link>
+            ))}
+          </CardContent>
         </Card>
       </div>
 

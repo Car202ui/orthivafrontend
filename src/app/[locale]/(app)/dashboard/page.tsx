@@ -20,7 +20,7 @@ export default function DashboardPage() {
       title: t("dashboard.doctor.title"),
       tiles: [
         { href: "/doctor/patients", title: t("nav.patients"), description: t("dashboard.doctor.patients"), ready: true },
-        { href: "/doctor/orders", title: t("nav.orders"), description: t("dashboard.doctor.orders"), ready: false },
+        { href: "/doctor/orders", title: t("nav.orders"), description: t("dashboard.doctor.orders"), ready: true },
         { href: "/doctor/clinics", title: t("nav.clinics"), description: t("dashboard.doctor.clinics"), ready: true },
       ],
     });

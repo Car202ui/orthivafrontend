@@ -129,7 +129,11 @@ export default function AdminUsersPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("adminUsers.role")}</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        items={Object.fromEntries(STAFF_TYPES.map((type) => [type, t(`roles.${type}`)]))}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />

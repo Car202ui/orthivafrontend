@@ -13,6 +13,7 @@ export function LanguageSwitcher({ onChange }: { onChange?: (locale: AppLocale) 
 
   return (
     <Select
+      items={Object.fromEntries(routing.locales.map((l) => [l, t(l)]))}
       value={locale}
       onValueChange={(next) => {
         router.replace(pathname, { locale: next as AppLocale });

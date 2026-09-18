@@ -91,7 +91,7 @@ export type Me = {
   roles: string[];
   onboardingRequired: boolean;
   person: Person | null;
-  tenant: { id: string; name: string; currency: string } | null;
+  tenant: { id: string; name: string; currency: string; diagnosisPrice: number } | null;
 };
 
 export type Clinic = {
@@ -134,6 +134,155 @@ export type PatientInput = {
   gender?: Gender | null;
   phoneCountry?: string;
   phoneNumber?: string;
+};
+
+export type OrderStatus =
+  | "DRAFT"
+  | "SUBMITTED"
+  | "DIAGNOSIS_PAID"
+  | "IN_PLANNING"
+  | "PLAN_SENT"
+  | "CHANGES_REQUESTED"
+  | "APPROVED"
+  | "TREATMENT_PAID"
+  | "IN_PRODUCTION"
+  | "SHIPPED"
+  | "IN_FOLLOW_UP"
+  | "CLOSED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export const ORDER_STATUSES: OrderStatus[] = [
+  "DRAFT",
+  "SUBMITTED",
+  "DIAGNOSIS_PAID",
+  "IN_PLANNING",
+  "PLAN_SENT",
+  "CHANGES_REQUESTED",
+  "APPROVED",
+  "TREATMENT_PAID",
+  "IN_PRODUCTION",
+  "SHIPPED",
+  "IN_FOLLOW_UP",
+  "CLOSED",
+  "REJECTED",
+  "CANCELLED",
+];
+
+export type Arch = "UPPER" | "LOWER" | "BOTH";
+
+export type MediaKind =
+  | "PHOTO_FRONTAL"
+  | "PHOTO_PROFILE"
+  | "PHOTO_SMILE"
+  | "PHOTO_INTRAORAL_UPPER"
+  | "PHOTO_INTRAORAL_LOWER"
+  | "PHOTO_INTRAORAL_RIGHT"
+  | "PHOTO_INTRAORAL_LEFT"
+  | "PHOTO_INTRAORAL_FRONTAL"
+  | "XRAY_PANORAMIC"
+  | "XRAY_LATERAL"
+  | "VIDEO"
+  | "STL"
+  | "PDF"
+  | "OTHER";
+
+export const PRESCRIPTION_KINDS: { group: "photos" | "xrays" | "other"; kinds: MediaKind[] }[] = [
+  {
+    group: "photos",
+    kinds: [
+      "PHOTO_FRONTAL",
+      "PHOTO_PROFILE",
+      "PHOTO_SMILE",
+      "PHOTO_INTRAORAL_UPPER",
+      "PHOTO_INTRAORAL_LOWER",
+      "PHOTO_INTRAORAL_RIGHT",
+      "PHOTO_INTRAORAL_LEFT",
+      "PHOTO_INTRAORAL_FRONTAL",
+    ],
+  },
+  { group: "xrays", kinds: ["XRAY_PANORAMIC", "XRAY_LATERAL"] },
+  { group: "other", kinds: ["STL", "VIDEO", "PDF", "OTHER"] },
+];
+
+export type Media = {
+  id: string;
+  kind: MediaKind;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  widthPx: number | null;
+  heightPx: number | null;
+  url: string;
+  thumbnailUrl: string | null;
+  createdAt: string;
+};
+
+export type Movement = {
+  id?: string;
+  toothFdi: number | null;
+  torque?: string | null;
+  rotation?: string | null;
+  buccolingual?: string | null;
+  mesiodistal?: string | null;
+  intrusionExtrusion?: string | null;
+  notes?: string | null;
+};
+
+export type OrderHistory = {
+  fromStatus: OrderStatus | null;
+  toStatus: OrderStatus;
+  changedBy: string | null;
+  changedByName: string | null;
+  note: string | null;
+  changedAt: string;
+};
+
+export type Order = {
+  id: string;
+  orderNumber: number;
+  status: OrderStatus;
+  doctorId: string;
+  doctorName: string;
+  patientId: string;
+  patientName: string;
+  clinicId: string | null;
+  arch: Arch;
+  firstTime: boolean;
+  reevaluation: boolean;
+  treatmentGoal: string | null;
+  diagnosisPrice: number | null;
+  currency: string | null;
+  submittedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  movements: Movement[];
+  media: Media[];
+  history: OrderHistory[];
+};
+
+export type OrderInput = {
+  patientId: string;
+  clinicId?: string | null;
+  arch: Arch;
+  firstTime: boolean;
+  reevaluation: boolean;
+  treatmentGoal?: string;
+  movements: Movement[];
+};
+
+export type Payment = {
+  id: string;
+  orderId: string;
+  planId: string | null;
+  purpose: "DIAGNOSIS" | "TREATMENT";
+  status: "PENDING" | "APPROVED" | "DECLINED" | "REFUNDED" | "ERROR";
+  amount: number;
+  currency: string;
+  gateway: string;
+  gatewayReference: string | null;
+  paidAt: string | null;
+  createdAt: string;
 };
 
 export type DoctorSummary = {

@@ -93,7 +93,11 @@ export function PatientForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("profile.gender")}</FormLabel>
-                <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                <Select
+                  items={{ F: t("profile.genderF"), M: t("profile.genderM"), X: t("profile.genderX") }}
+                  value={field.value ?? ""}
+                  onValueChange={field.onChange}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="—" />

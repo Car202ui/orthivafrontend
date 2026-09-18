@@ -33,7 +33,8 @@ src/
 │       ├── onboarding/        # Usuario nuevo elige DOCTOR/PATIENT y completa perfil
 │       ├── profile/           # Mi perfil
 │       ├── doctor/clinics/    # Clínicas del doctor (CRUD)
-│       ├── doctor/patients/   # Pacientes: lista con búsqueda, alta, ficha [id]
+│       ├── doctor/patients/   # Pacientes: lista con búsqueda, alta, ficha [id] (con sus órdenes)
+│       ├── doctor/orders/     # Órdenes: lista con filtro, new (borrador), [id] (pestañas prescripción/archivos/enviar o detalle + pagos + línea de tiempo)
 │       ├── patient/treatment/ # Portal del paciente (equipo tratante)
 │       └── admin/users/       # ADMIN crea usuarios internos
 ├── components/
@@ -51,4 +52,5 @@ src/
 - **Fase 0** ✅ login, sesión y llamada autenticada al core.
 - **Fase 1.1** ✅ i18n es/en, onboarding, perfil, menú por rol, administración de usuarios internos.
 - **Fase 1.2** ✅ clínicas, pacientes (búsqueda, alta, ficha, edición) y portal del paciente.
-- Siguientes: 1.3 prescripción · 1.4 planeación · 1.5 aprobación · 1.6 pagos · 1.7 seguimiento · 1.8 notificaciones.
+- **Fase 1.3** ✅ prescripciones: formulario con movimientos por diente, carga de archivos con miniaturas, envío al laboratorio, línea de tiempo y pagos.
+- Siguientes: 1.4 planeación · 1.4 planeación · 1.5 aprobación · 1.6 pagos · 1.7 seguimiento · 1.8 notificaciones.
