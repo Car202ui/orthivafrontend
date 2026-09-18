@@ -19,9 +19,9 @@ export default function DashboardPage() {
     sections.push({
       title: t("dashboard.doctor.title"),
       tiles: [
-        { href: "/doctor/patients", title: t("nav.patients"), description: t("dashboard.doctor.patients"), ready: false },
+        { href: "/doctor/patients", title: t("nav.patients"), description: t("dashboard.doctor.patients"), ready: true },
         { href: "/doctor/orders", title: t("nav.orders"), description: t("dashboard.doctor.orders"), ready: false },
-        { href: "/doctor/clinics", title: t("nav.clinics"), description: t("dashboard.doctor.clinics"), ready: false },
+        { href: "/doctor/clinics", title: t("nav.clinics"), description: t("dashboard.doctor.clinics"), ready: true },
       ],
     });
   }
@@ -38,7 +38,7 @@ export default function DashboardPage() {
     sections.push({
       title: t("dashboard.patient.title"),
       tiles: [
-        { href: "/patient/treatment", title: t("nav.myTreatment"), description: t("dashboard.patient.treatment"), ready: false },
+        { href: "/patient/treatment", title: t("nav.myTreatment"), description: t("dashboard.patient.treatment"), ready: true },
       ],
     });
   }

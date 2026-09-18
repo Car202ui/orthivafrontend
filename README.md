@@ -32,6 +32,9 @@ src/
 │       ├── dashboard/         # Panel según rol
 │       ├── onboarding/        # Usuario nuevo elige DOCTOR/PATIENT y completa perfil
 │       ├── profile/           # Mi perfil
+│       ├── doctor/clinics/    # Clínicas del doctor (CRUD)
+│       ├── doctor/patients/   # Pacientes: lista con búsqueda, alta, ficha [id]
+│       ├── patient/treatment/ # Portal del paciente (equipo tratante)
 │       └── admin/users/       # ADMIN crea usuarios internos
 ├── components/
 │   ├── layout/                # app-shell (header, nav, menú de usuario), language-switcher
@@ -47,4 +50,5 @@ src/
 
 - **Fase 0** ✅ login, sesión y llamada autenticada al core.
 - **Fase 1.1** ✅ i18n es/en, onboarding, perfil, menú por rol, administración de usuarios internos.
-- Siguientes: 1.2 pacientes y clínicas · 1.3 prescripción · 1.4 planeación · 1.5 aprobación · 1.6 pagos · 1.7 seguimiento · 1.8 notificaciones.
+- **Fase 1.2** ✅ clínicas, pacientes (búsqueda, alta, ficha, edición) y portal del paciente.
+- Siguientes: 1.3 prescripción · 1.4 planeación · 1.5 aprobación · 1.6 pagos · 1.7 seguimiento · 1.8 notificaciones.

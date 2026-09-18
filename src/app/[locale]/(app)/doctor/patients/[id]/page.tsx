@@ -1,0 +1,112 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { PatientForm } from "@/components/forms/patient-form";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link } from "@/i18n/navigation";
+import { ApiError, type Patient, type PatientInput } from "@/lib/api";
+import { parseLocalDate } from "@/lib/dates";
+import { useApi } from "@/lib/query";
+
+function age(birthDate: string | null): number | null {
+  if (!birthDate) return null;
+  const b = parseLocalDate(birthDate);
+  const now = new Date();
+  let a = now.getFullYear() - b.getFullYear();
+  if (now < new Date(now.getFullYear(), b.getMonth(), b.getDate())) a -= 1;
+  return a;
+}
+
+export default function PatientRecordPage() {
+  const t = useTranslations();
+  const { id } = useParams<{ id: string }>();
+  const call = useApi();
+  const queryClient = useQueryClient();
+  const [editing, setEditing] = useState(false);
+
+  const patient = useQuery({ queryKey: ["patients", "one", id], queryFn: () => call<Patient>(`/api/patients/${id}`) });
+
+  const update = useMutation({
+    mutationFn: (input: PatientInput) => call<Patient>(`/api/patients/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+    onSuccess: () => {
+      toast.success(t("patients.updated"));
+      setEditing(false);
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+    },
+    onError: (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message),
+  });
+
+  if (patient.isError) return <p className="text-destructive">{t("patients.notFound")}</p>;
+  const p = patient.data;
+  if (!p) return null;
+  const years = age(p.birthDate);
+
+  const row = (label: string, value: React.ReactNode) => (
+    <div className="grid grid-cols-[160px_1fr] gap-2 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span>{value ?? "—"}</span>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Link href="/doctor/patients" className="text-sm text-muted-foreground hover:underline">
+            ← {t("patients.title")}
+          </Link>
+          <h1 className="mt-1 flex items-center gap-3 text-2xl font-semibold tracking-tight">
+            {p.firstName} {p.lastName}
+            <Badge variant={p.hasLogin ? "default" : "secondary"}>
+              {p.hasLogin ? t("patients.hasLogin") : t("patients.noLogin")}
+            </Badge>
+          </h1>
+        </div>
+        <Button variant="outline" onClick={() => setEditing(true)}>
+          {t("patients.edit")}
+        </Button>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("patients.record")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {row(t("profile.documentId"), p.documentId)}
+            {row(t("profile.birthDate"), p.birthDate ? `${p.birthDate}${years !== null ? ` · ${t("patients.age", { age: years })}` : ""}` : null)}
+            {row(t("profile.gender"), p.gender ? t(`profile.gender${p.gender}`) : null)}
+            {row(t("patients.email"), p.email)}
+            {row(t("patients.phone"), p.phoneNumber ? `${p.phoneCountry ?? ""} ${p.phoneNumber}` : null)}
+          </CardContent>
+        </Card>
+
+        <Card className="opacity-70">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              {t("patients.orders")}
+              <Badge variant="outline">{t("app.comingSoon")}</Badge>
+            </CardTitle>
+            <CardDescription>{t("patients.ordersSoon")}</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+
+      <Dialog open={editing} onOpenChange={setEditing}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("patients.edit")}</DialogTitle>
+          </DialogHeader>
+          <PatientForm initial={p} onSubmit={(input) => update.mutate(input)} onCancel={() => setEditing(false)} pending={update.isPending} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

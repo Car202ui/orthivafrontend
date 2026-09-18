@@ -17,11 +17,11 @@ export default function LoginPage() {
   }, [auth.isAuthenticated, router]);
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
-      <div className="absolute right-4 top-4">
+    <main className="flex flex-1 flex-col p-4">
+      <div className="flex justify-end">
         <LanguageSwitcher />
       </div>
-      <div className="w-full max-w-sm space-y-6 text-center">
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center space-y-6 py-10 text-center">
         <div>
           <h1 className="text-4xl font-semibold tracking-tight">{t("app.name")}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{t("app.tagline")}</p>

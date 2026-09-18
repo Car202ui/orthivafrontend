@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -26,8 +26,8 @@ function navFor(roles: string[]): NavItem[] {
   const items: NavItem[] = [{ href: "/dashboard", labelKey: "dashboard", ready: true }];
   if (roles.includes("DOCTOR")) {
     items.push(
-      { href: "/doctor/patients", labelKey: "patients", ready: false },
-      { href: "/doctor/clinics", labelKey: "clinics", ready: false },
+      { href: "/doctor/patients", labelKey: "patients", ready: true },
+      { href: "/doctor/clinics", labelKey: "clinics", ready: true },
       { href: "/doctor/orders", labelKey: "orders", ready: false },
     );
   }
@@ -38,7 +38,7 @@ function navFor(roles: string[]): NavItem[] {
     items.push({ href: "/lab/production", labelKey: "production", ready: false });
   }
   if (roles.includes("PATIENT")) {
-    items.push({ href: "/patient/treatment", labelKey: "myTreatment", ready: false });
+    items.push({ href: "/patient/treatment", labelKey: "myTreatment", ready: true });
   }
   if (roles.includes("ADMIN")) {
     items.push({ href: "/admin/users", labelKey: "users", ready: true });
