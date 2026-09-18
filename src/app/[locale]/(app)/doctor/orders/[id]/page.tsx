@@ -1,16 +1,29 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { MediaPanel } from "@/components/orders/media-panel";
-import { OrderForm } from "@/components/orders/order-form";
-import { OrderSummary } from "@/components/orders/order-summary";
-import { OrderTimeline } from "@/components/orders/order-timeline";
-import { PaymentsCard } from "@/components/orders/payments-card";
-import { OrderStatusBadge } from "@/components/orders/status-badge";
+import { useClinics } from "@/features/clinics";
+import { useMe } from "@/features/identity";
+import {
+  OrderForm,
+  OrderStatusBadge,
+  OrderSummary,
+  OrderTimeline,
+  orderKey,
+  PRESCRIPTION_KINDS,
+  useCancelOrder,
+  useOrder,
+  useSubmitOrder,
+  useUpdateOrder,
+  type OrderInput,
+} from "@/features/orders";
+import { usePatients } from "@/features/patients";
+import { PaymentsCard } from "@/features/payments";
+import { useApiErrorToast } from "@/shared/api/errors";
+import { Link } from "@/shared/i18n/navigation";
+import { MediaPanel } from "@/shared/media/media-panel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,57 +33,37 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "@/i18n/navigation";
-import { ApiError, type Order, type OrderInput } from "@/lib/api";
-import { useApi, useMe } from "@/lib/query";
+} from "@/shared/ui/alert-dialog";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 
 export default function OrderPage() {
   const t = useTranslations();
   const format = useFormatter();
   const { id } = useParams<{ id: string }>();
   const params = useSearchParams();
-  const call = useApi();
   const me = useMe();
-  const queryClient = useQueryClient();
   const [confirm, setConfirm] = useState<"submit" | "cancel" | null>(null);
 
-  const order = useQuery({ queryKey: ["orders", "one", id], queryFn: () => call<Order>(`/api/orders/${id}`) });
-  const onError = (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message);
-  const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["orders"] });
-    queryClient.invalidateQueries({ queryKey: ["payments", id] });
-  };
+  const order = useOrder(id);
+  const update = useUpdateOrder(id);
+  const submit = useSubmitOrder(id);
+  const cancel = useCancelOrder(id);
+  const onError = useApiErrorToast();
+  // Select choices for the draft form; composed here so orders/ does not depend on patients/ or clinics/.
+  const patients = usePatients().data?.map((p) => ({ id: p.id, label: `${p.lastName}, ${p.firstName}` })) ?? [];
+  const clinics = useClinics().data?.map((c) => ({ id: c.id, label: c.name })) ?? [];
 
-  const update = useMutation({
-    mutationFn: (input: OrderInput) => call<Order>(`/api/orders/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-    onSuccess: () => {
-      toast.success(t("orders.draftSaved"));
-      refresh();
-    },
-    onError,
-  });
-  const submit = useMutation({
-    mutationFn: () => call<Order>(`/api/orders/${id}/submit`, { method: "POST" }),
-    onSuccess: () => {
-      toast.success(t("orders.submitted"));
+  const saveDraft = (input: OrderInput) => update.mutate(input, { onSuccess: () => toast.success(t("orders.draftSaved")), onError });
+  const confirmAction = () => {
+    const done = (message: string) => () => {
+      toast.success(message);
       setConfirm(null);
-      refresh();
-    },
-    onError,
-  });
-  const cancel = useMutation({
-    mutationFn: () => call<Order>(`/api/orders/${id}/cancel`, { method: "POST", body: JSON.stringify({}) }),
-    onSuccess: () => {
-      toast.success(t("orders.cancelled"));
-      setConfirm(null);
-      refresh();
-    },
-    onError,
-  });
+    };
+    if (confirm === "submit") submit.mutate(undefined, { onSuccess: done(t("orders.submitted")), onError });
+    else cancel.mutate(undefined, { onSuccess: done(t("orders.cancelled")), onError });
+  };
 
   if (order.isError) return <p className="text-destructive">{t("orders.notFound")}</p>;
   const o = order.data;
@@ -79,7 +72,17 @@ export default function OrderPage() {
   const editable = isDoctor && o.status === "DRAFT";
   // Drafts have no snapshot yet: show the tenant's current diagnosis price.
   const priceLabel = `${format.number(o.diagnosisPrice ?? me.data?.tenant?.diagnosisPrice ?? 0)} ${o.currency ?? me.data?.tenant?.currency ?? ""}`.trim();
-  const mediaInvalidate: unknown[][] = [["orders", "one", id]];
+  const mediaInvalidate = [orderKey(id)];
+  const media = (editableFiles: boolean) => (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("orders.media.title")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <MediaPanel basePath={`/api/orders/${o.id}`} media={o.media} editable={editableFiles} kindGroups={PRESCRIPTION_KINDS} invalidate={mediaInvalidate} />
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
@@ -113,30 +116,16 @@ export default function OrderPage() {
           <TabsContent value="prescription" className="pt-4">
             <Card>
               <CardContent className="pt-6">
-                <OrderForm initial={o} onSubmit={(input) => update.mutate(input)} pending={update.isPending} submitLabel={t("orders.saveDraft")} />
+                <OrderForm initial={o} patients={patients} clinics={clinics} onSubmit={saveDraft} pending={update.isPending} submitLabel={t("orders.saveDraft")} />
               </CardContent>
             </Card>
           </TabsContent>
           <TabsContent value="files" className="pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("orders.media.title")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MediaPanel basePath={`/api/orders/${o.id}`} media={o.media} editable invalidate={mediaInvalidate} />
-              </CardContent>
-            </Card>
+            {media(true)}
           </TabsContent>
           <TabsContent value="review" className="space-y-4 pt-4">
             <OrderSummary order={o} />
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("orders.media.title")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MediaPanel basePath={`/api/orders/${o.id}`} media={o.media} editable={false} invalidate={mediaInvalidate} />
-              </CardContent>
-            </Card>
+            {media(false)}
             <Button size="lg" onClick={() => setConfirm("submit")}>
               {t("orders.submit")}
             </Button>
@@ -146,14 +135,7 @@ export default function OrderPage() {
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
             <OrderSummary order={o} />
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("orders.media.title")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MediaPanel basePath={`/api/orders/${o.id}`} media={o.media} editable={false} invalidate={mediaInvalidate} />
-              </CardContent>
-            </Card>
+            {media(false)}
           </div>
           <div className="space-y-6">
             <PaymentsCard orderId={o.id} canPay={isDoctor} />
@@ -172,9 +154,7 @@ export default function OrderPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("app.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => (confirm === "submit" ? submit.mutate() : cancel.mutate())}>
-              {confirm === "submit" ? t("orders.submit") : t("orders.cancel")}
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmAction}>{confirm === "submit" ? t("orders.submit") : t("orders.cancel")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,32 +1,34 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { OrderForm } from "@/components/orders/order-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "@/i18n/navigation";
-import { ApiError, type Order, type OrderInput } from "@/lib/api";
-import { useApi } from "@/lib/query";
+import { useClinics } from "@/features/clinics";
+import { OrderForm, useCreateOrder, type OrderInput } from "@/features/orders";
+import { usePatients } from "@/features/patients";
+import { useApiErrorToast } from "@/shared/api/errors";
+import { useRouter } from "@/shared/i18n/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 
 /** Step 1 of a prescription: creates the draft, then continues on the order page (files, send). */
 export default function NewOrderPage() {
   const t = useTranslations();
-  const call = useApi();
+  const onError = useApiErrorToast();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const params = useSearchParams();
+  const create = useCreateOrder();
+  // The form only needs choices; the page composes them so orders/ stays independent of patients/ and clinics/.
+  const patients = usePatients().data?.map((p) => ({ id: p.id, label: `${p.lastName}, ${p.firstName}` })) ?? [];
+  const clinics = useClinics().data?.map((c) => ({ id: c.id, label: c.name })) ?? [];
 
-  const create = useMutation({
-    mutationFn: (input: OrderInput) => call<Order>("/api/orders", { method: "POST", body: JSON.stringify(input) }),
-    onSuccess: (o) => {
-      toast.success(t("orders.draftSaved"));
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      router.push(`/doctor/orders/${o.id}?tab=files`);
-    },
-    onError: (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message),
-  });
+  const submit = (input: OrderInput) =>
+    create.mutate(input, {
+      onSuccess: (o) => {
+        toast.success(t("orders.draftSaved"));
+        router.push(`/doctor/orders/${o.id}?tab=files`);
+      },
+      onError,
+    });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -41,7 +43,9 @@ export default function NewOrderPage() {
         <CardContent>
           <OrderForm
             presetPatientId={params.get("patientId")}
-            onSubmit={(input) => create.mutate(input)}
+            patients={patients}
+            clinics={clinics}
+            onSubmit={submit}
             pending={create.isPending}
             submitLabel={t("app.continue")}
           />

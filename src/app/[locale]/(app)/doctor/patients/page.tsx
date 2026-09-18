@@ -1,24 +1,21 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PatientForm } from "@/components/forms/patient-form";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Link, useRouter } from "@/i18n/navigation";
-import { ApiError, type Patient, type PatientInput } from "@/lib/api";
-import { useApi } from "@/lib/query";
+import { PatientForm, useCreatePatient, usePatients, type PatientInput } from "@/features/patients";
+import { useApiErrorToast } from "@/shared/api/errors";
+import { Link, useRouter } from "@/shared/i18n/navigation";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
+import { Input } from "@/shared/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
 export default function PatientsPage() {
   const t = useTranslations();
-  const call = useApi();
+  const onError = useApiErrorToast();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [q, setQ] = useState("");
   const [debounced, setDebounced] = useState("");
   const [creating, setCreating] = useState(false);
@@ -28,21 +25,18 @@ export default function PatientsPage() {
     return () => clearTimeout(id);
   }, [q]);
 
-  const patients = useQuery({
-    queryKey: ["patients", debounced],
-    queryFn: () => call<Patient[]>(`/api/patients${debounced ? `?q=${encodeURIComponent(debounced)}` : ""}`),
-  });
+  const patients = usePatients(debounced);
+  const create = useCreatePatient();
 
-  const create = useMutation({
-    mutationFn: (input: PatientInput) => call<Patient>("/api/patients", { method: "POST", body: JSON.stringify(input) }),
-    onSuccess: (p) => {
-      toast.success(t("patients.created"));
-      setCreating(false);
-      queryClient.invalidateQueries({ queryKey: ["patients"] });
-      router.push(`/doctor/patients/${p.id}`);
-    },
-    onError: (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message),
-  });
+  const submit = (input: PatientInput) =>
+    create.mutate(input, {
+      onSuccess: (p) => {
+        toast.success(t("patients.created"));
+        setCreating(false);
+        router.push(`/doctor/patients/${p.id}`);
+      },
+      onError,
+    });
 
   return (
     <div className="space-y-6">
@@ -99,7 +93,7 @@ export default function PatientsPage() {
           <DialogHeader>
             <DialogTitle>{t("patients.new")}</DialogTitle>
           </DialogHeader>
-          <PatientForm onSubmit={(input) => create.mutate(input)} onCancel={() => setCreating(false)} pending={create.isPending} />
+          <PatientForm onSubmit={submit} onCancel={() => setCreating(false)} pending={create.isPending} />
         </DialogContent>
       </Dialog>
     </div>

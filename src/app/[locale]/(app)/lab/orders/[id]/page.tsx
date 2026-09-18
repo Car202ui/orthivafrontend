@@ -1,15 +1,15 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { MediaPanel } from "@/components/orders/media-panel";
-import { OrderSummary } from "@/components/orders/order-summary";
-import { OrderTimeline } from "@/components/orders/order-timeline";
-import { PlanForm } from "@/components/orders/plan-form";
-import { OrderStatusBadge } from "@/components/orders/status-badge";
+import { OrderStatusBadge, OrderSummary, OrderTimeline, orderKey, PRESCRIPTION_KINDS, useOrder, type OrderStatus } from "@/features/orders";
+import { PLAN_KINDS, PlanForm, plansKey, usePlans, useSavePlan, useSendPlan, useStartPlanning, type Plan, type PlanInput } from "@/features/planning";
+import { useApiErrorToast } from "@/shared/api/errors";
+import { Link } from "@/shared/i18n/navigation";
+import { MediaPanel } from "@/shared/media/media-panel";
+import type { MediaKind } from "@/shared/media/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,55 +19,37 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "@/i18n/navigation";
-import { ApiError, PLAN_KINDS, type MediaKind, type Order, type Plan, type PlanInput } from "@/lib/api";
-import { useApi } from "@/lib/query";
+} from "@/shared/ui/alert-dialog";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 
-const CAN_START: Order["status"][] = ["DIAGNOSIS_PAID", "CHANGES_REQUESTED", "IN_PLANNING"];
+const CAN_START: OrderStatus[] = ["DIAGNOSIS_PAID", "CHANGES_REQUESTED", "IN_PLANNING"];
 
 export default function LabOrderPage() {
   const t = useTranslations();
   const format = useFormatter();
   const { id } = useParams<{ id: string }>();
-  const call = useApi();
-  const queryClient = useQueryClient();
   const [confirmSend, setConfirmSend] = useState<Plan | null>(null);
 
-  const order = useQuery({ queryKey: ["orders", "one", id], queryFn: () => call<Order>(`/api/orders/${id}`) });
-  const plans = useQuery({ queryKey: ["plans", id], queryFn: () => call<Plan[]>(`/api/orders/${id}/plans`) });
-  const onError = (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message);
-  const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["orders"] });
-    queryClient.invalidateQueries({ queryKey: ["plans", id] });
-  };
+  const order = useOrder(id);
+  const plans = usePlans(id);
+  const start = useStartPlanning(id);
+  const save = useSavePlan(id);
+  const send = useSendPlan(id);
+  const onError = useApiErrorToast();
 
-  const start = useMutation({
-    mutationFn: () => call<Plan>(`/api/orders/${id}/plans`, { method: "POST" }),
-    onSuccess: refresh,
-    onError,
-  });
-  const save = useMutation({
-    mutationFn: ({ planId, input }: { planId: string; input: PlanInput }) =>
-      call<Plan>(`/api/plans/${planId}`, { method: "PUT", body: JSON.stringify(input) }),
-    onSuccess: () => {
-      toast.success(t("lab.planSaved"));
-      refresh();
-    },
-    onError,
-  });
-  const send = useMutation({
-    mutationFn: (planId: string) => call<Plan>(`/api/plans/${planId}/send`, { method: "POST" }),
-    onSuccess: () => {
-      toast.success(t("lab.planSentToast"));
-      setConfirmSend(null);
-      refresh();
-    },
-    onError,
-  });
+  const savePlan = (planId: string) => (input: PlanInput) =>
+    save.mutate({ planId, input }, { onSuccess: () => toast.success(t("lab.planSaved")), onError });
+  const sendPlan = () =>
+    confirmSend &&
+    send.mutate(confirmSend.id, {
+      onSuccess: () => {
+        toast.success(t("lab.planSentToast"));
+        setConfirmSend(null);
+      },
+      onError,
+    });
 
   if (order.isError) return <p className="text-destructive">{t("orders.notFound")}</p>;
   const o = order.data;
@@ -76,6 +58,17 @@ export default function LabOrderPage() {
   const sentPlans = plans.data?.filter((p) => p.sent) ?? [];
   const kindLabel = (k: MediaKind) => t(`lab.kinds.${k}`);
   const groupLabel = (g: string) => (g === "other" ? t("orders.media.other") : g === "model3d" ? "3D" : t("orders.arch"));
+  const planMedia = (plan: Plan, editable: boolean) => (
+    <MediaPanel
+      basePath={`/api/plans/${plan.id}`}
+      media={plan.media}
+      editable={editable}
+      kindGroups={PLAN_KINDS}
+      kindLabel={kindLabel}
+      groupLabel={groupLabel}
+      invalidate={[plansKey(id)]}
+    />
+  );
 
   return (
     <div className="space-y-6">
@@ -93,7 +86,7 @@ export default function LabOrderPage() {
           </p>
         </div>
         {!draft && CAN_START.includes(o.status) && (
-          <Button onClick={() => start.mutate()} disabled={start.isPending}>
+          <Button onClick={() => start.mutate(undefined, { onError })} disabled={start.isPending}>
             {sentPlans.length > 0 ? t("lab.newVersion") : t("lab.startPlanning")}
           </Button>
         )}
@@ -107,7 +100,7 @@ export default function LabOrderPage() {
               <CardTitle>{t("lab.prescription")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <MediaPanel basePath={`/api/orders/${o.id}`} media={o.media} editable={false} invalidate={[["orders", "one", id]]} />
+              <MediaPanel basePath={`/api/orders/${o.id}`} media={o.media} editable={false} kindGroups={PRESCRIPTION_KINDS} invalidate={[orderKey(id)]} />
             </CardContent>
           </Card>
           <OrderTimeline order={o} />
@@ -130,19 +123,11 @@ export default function LabOrderPage() {
                 <CardDescription>{draft.plannerName}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <PlanForm plan={draft} onSubmit={(input) => save.mutate({ planId: draft.id, input })} pending={save.isPending} />
+                <PlanForm plan={draft} onSubmit={savePlan(draft.id)} pending={save.isPending} />
                 <div>
                   <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("lab.planMedia")}</h3>
                   <p className="mb-3 text-xs text-muted-foreground">{t("lab.planMediaHint")}</p>
-                  <MediaPanel
-                    basePath={`/api/plans/${draft.id}`}
-                    media={draft.media}
-                    editable
-                    kindGroups={PLAN_KINDS}
-                    kindLabel={kindLabel}
-                    groupLabel={groupLabel}
-                    invalidate={[["plans", id]]}
-                  />
+                  {planMedia(draft, true)}
                 </div>
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <span className="text-sm">
@@ -181,7 +166,7 @@ export default function LabOrderPage() {
                     {format.number(p.priceTotal ?? 0)} {p.currency}
                   </strong>
                 </p>
-                <MediaPanel basePath={`/api/plans/${p.id}`} media={p.media} editable={false} kindGroups={PLAN_KINDS} kindLabel={kindLabel} groupLabel={groupLabel} invalidate={[["plans", id]]} />
+                {planMedia(p, false)}
               </CardContent>
             </Card>
           ))}
@@ -200,7 +185,7 @@ export default function LabOrderPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("app.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => confirmSend && send.mutate(confirmSend.id)}>{t("lab.sendPlan")}</AlertDialogAction>
+            <AlertDialogAction onClick={sendPlan}>{t("lab.sendPlan")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

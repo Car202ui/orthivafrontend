@@ -2,10 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, type ReactNode } from "react";
-import { AppShell } from "@/components/layout/app-shell";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { useAuth } from "@/lib/auth";
-import { useMe } from "@/lib/query";
+import { useMe } from "@/features/identity";
+import { useAuth } from "@/shared/auth/provider";
+import { usePathname, useRouter } from "@/shared/i18n/navigation";
+import { AppShell } from "@/shared/layout/app-shell";
 
 /**
  * Guard for every authenticated page: requires a session, then routes users that
@@ -43,5 +43,17 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   // Onboarding renders without the shell (no menus until a role exists).
   if (me.data.onboardingRequired) return <>{children}</>;
 
-  return <AppShell me={me.data}>{children}</AppShell>;
+  const { person } = me.data;
+  return (
+    <AppShell
+      user={{
+        roles: me.data.roles,
+        displayName: person ? `${person.firstName} ${person.lastName}` : (me.data.name ?? me.data.username),
+        email: me.data.email,
+        hasProfile: !!person,
+      }}
+    >
+      {children}
+    </AppShell>
+  );
 }

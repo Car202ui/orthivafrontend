@@ -1,19 +1,17 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { DoctorSummary } from "@/lib/api";
-import { parseLocalDate } from "@/lib/dates";
-import { useApi, useMe } from "@/lib/query";
+import { useMe } from "@/features/identity";
+import { useMyDoctors } from "@/features/patients";
+import { parseLocalDate } from "@/shared/lib/dates";
+import { Badge } from "@/shared/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 
 export default function PatientTreatmentPage() {
   const t = useTranslations();
   const format = useFormatter();
   const me = useMe();
-  const call = useApi();
-  const doctors = useQuery({ queryKey: ["portal", "doctors"], queryFn: () => call<DoctorSummary[]>("/api/portal/doctors") });
+  const doctors = useMyDoctors();
 
   return (
     <div className="space-y-6">

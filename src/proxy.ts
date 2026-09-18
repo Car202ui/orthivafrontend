@@ -1,5 +1,5 @@
 import createMiddleware from "next-intl/middleware";
-import { routing } from "./i18n/routing";
+import { routing } from "@/shared/i18n/routing";
 
 // Locale detection + redirect (e.g. "/" -> "/es"). Next 16 calls this file proxy.ts.
 export default createMiddleware(routing);

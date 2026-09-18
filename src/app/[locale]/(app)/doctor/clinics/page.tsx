@@ -1,10 +1,10 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ClinicForm } from "@/components/forms/clinic-form";
+import { ClinicForm, useClinics, useDeleteClinic, useSaveClinic, type Clinic, type ClinicInput } from "@/features/clinics";
+import { useApiErrorToast } from "@/shared/api/errors";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,48 +14,42 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ApiError, type Clinic, type ClinicInput } from "@/lib/api";
-import { useApi } from "@/lib/query";
-
-const KEY = ["clinics"] as const;
+} from "@/shared/ui/alert-dialog";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 
 export default function ClinicsPage() {
   const t = useTranslations();
-  const call = useApi();
-  const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Clinic | null | "new">(null);
   const [deleting, setDeleting] = useState<Clinic | null>(null);
 
-  const clinics = useQuery({ queryKey: KEY, queryFn: () => call<Clinic[]>("/api/clinics") });
-  const onError = (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message);
-  const refresh = () => queryClient.invalidateQueries({ queryKey: KEY });
+  const clinics = useClinics();
+  const save = useSaveClinic();
+  const remove = useDeleteClinic();
+  const onError = useApiErrorToast();
 
-  const save = useMutation({
-    mutationFn: (input: ClinicInput) =>
-      editing === "new" || !editing
-        ? call<Clinic>("/api/clinics", { method: "POST", body: JSON.stringify(input) })
-        : call<Clinic>(`/api/clinics/${editing.id}`, { method: "PUT", body: JSON.stringify(input) }),
-    onSuccess: () => {
-      toast.success(editing === "new" ? t("clinics.created") : t("clinics.updated"));
-      setEditing(null);
-      refresh();
-    },
-    onError,
-  });
+  const submit = (input: ClinicInput) =>
+    save.mutate(
+      { id: editing === "new" || !editing ? undefined : editing.id, input },
+      {
+        onSuccess: () => {
+          toast.success(editing === "new" ? t("clinics.created") : t("clinics.updated"));
+          setEditing(null);
+        },
+        onError,
+      },
+    );
 
-  const remove = useMutation({
-    mutationFn: (id: string) => call<void>(`/api/clinics/${id}`, { method: "DELETE" }),
-    onSuccess: () => {
-      toast.success(t("clinics.deleted"));
-      setDeleting(null);
-      refresh();
-    },
-    onError,
-  });
+  const confirmDelete = () =>
+    deleting &&
+    remove.mutate(deleting.id, {
+      onSuccess: () => {
+        toast.success(t("clinics.deleted"));
+        setDeleting(null);
+      },
+      onError,
+    });
 
   return (
     <div className="space-y-6">
@@ -104,7 +98,7 @@ export default function ClinicsPage() {
             <ClinicForm
               key={editing === "new" ? "new" : editing.id}
               initial={editing === "new" ? null : editing}
-              onSubmit={(input) => save.mutate(input)}
+              onSubmit={submit}
               onCancel={() => setEditing(null)}
               pending={save.isPending}
             />
@@ -120,9 +114,7 @@ export default function ClinicsPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("app.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleting && remove.mutate(deleting.id)}>
-              {t("clinics.delete")}
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>{t("clinics.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

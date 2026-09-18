@@ -1,28 +1,20 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
-import { OrderStatusBadge } from "@/components/orders/status-badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Link } from "@/i18n/navigation";
-import { ORDER_STATUSES, type Order, type OrderStatus } from "@/lib/api";
-import { useApi } from "@/lib/query";
+import { ORDER_STATUSES, OrderStatusBadge, useOrders, type OrderStatus } from "@/features/orders";
+import { Link } from "@/shared/i18n/navigation";
+import { Button } from "@/shared/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
 const ALL = "__all__";
 
 export default function OrdersPage() {
   const t = useTranslations();
   const format = useFormatter();
-  const call = useApi();
   const [status, setStatus] = useState<string>(ALL);
-
-  const orders = useQuery({
-    queryKey: ["orders", status],
-    queryFn: () => call<Order[]>(`/api/orders${status === ALL ? "" : `?status=${status}`}`),
-  });
+  const orders = useOrders({ status: status === ALL ? null : (status as OrderStatus) });
 
   return (
     <div className="space-y-6">
@@ -48,7 +40,7 @@ export default function OrdersPage() {
           <SelectItem value={ALL}>{t("orders.allStatuses")}</SelectItem>
           {ORDER_STATUSES.map((s) => (
             <SelectItem key={s} value={s}>
-              {t(`orders.statuses.${s as OrderStatus}`)}
+              {t(`orders.statuses.${s}`)}
             </SelectItem>
           ))}
         </SelectContent>

@@ -2,10 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { LanguageSwitcher } from "@/components/layout/language-switcher";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "@/i18n/navigation";
-import { useAuth } from "@/lib/auth";
+import { LanguageSwitcher } from "@/shared/layout/language-switcher";
+import { Button } from "@/shared/ui/button";
+import { useRouter } from "@/shared/i18n/navigation";
+import { useAuth } from "@/shared/auth/provider";
 
 export default function LoginPage() {
   const t = useTranslations();

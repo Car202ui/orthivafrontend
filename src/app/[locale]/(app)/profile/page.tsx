@@ -1,42 +1,32 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
 import { toast } from "sonner";
-import { ProfileForm } from "@/components/forms/profile-form";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter, usePathname } from "@/i18n/navigation";
-import { ApiError, type Person, type ProfileInput } from "@/lib/api";
-import { meQueryKey, useApi, useMe } from "@/lib/query";
+import { ProfileForm, useMe, useUpdateProfile, type ProfileInput } from "@/features/identity";
+import { useApiErrorToast } from "@/shared/api/errors";
+import { usePathname, useRouter } from "@/shared/i18n/navigation";
+import { Badge } from "@/shared/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 
 export default function ProfilePage() {
   const t = useTranslations();
+  const onError = useApiErrorToast();
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const me = useMe();
-  const call = useApi();
-  const queryClient = useQueryClient();
-  const [pending, setPending] = useState(false);
+  const update = useUpdateProfile();
   const person = me.data?.person;
   if (!person) return null;
 
-  const submit = async (input: ProfileInput) => {
-    setPending(true);
-    try {
-      const updated = await call<Person>("/api/me/profile", { method: "PUT", body: JSON.stringify(input) });
-      await queryClient.invalidateQueries({ queryKey: meQueryKey });
-      toast.success(t("app.saved"));
-      if (updated.locale !== locale) router.replace(pathname, { locale: updated.locale as "es" | "en" });
-    } catch (e) {
-      const err = e as ApiError;
-      toast.error(err.code ? t(`errors.${err.code}`) : err.message);
-    } finally {
-      setPending(false);
-    }
-  };
+  const submit = (input: ProfileInput) =>
+    update.mutate(input, {
+      onSuccess: (updated) => {
+        toast.success(t("app.saved"));
+        if (updated.locale !== locale) router.replace(pathname, { locale: updated.locale as "es" | "en" });
+      },
+      onError,
+    });
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -53,14 +43,7 @@ export default function ProfilePage() {
           <CardTitle>{t(`roles.${person.type}`)}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProfileForm
-            type={person.type}
-            locale={locale}
-            initial={person}
-            submitLabel={t("app.save")}
-            onSubmit={submit}
-            pending={pending}
-          />
+          <ProfileForm type={person.type} locale={locale} initial={person} submitLabel={t("app.save")} onSubmit={submit} pending={update.isPending} />
         </CardContent>
       </Card>
     </div>

@@ -1,43 +1,29 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ApiError, type Person, type PersonType } from "@/lib/api";
-import { useApi, useMe } from "@/lib/query";
-
-const STAFF_TYPES: PersonType[] = ["LAB", "PLANNER", "PRODUCTION", "ACCOUNTING", "REPRESENTATIVE"];
+import { STAFF_TYPES, useCreateStaff, useMe, useStaff, type PersonType } from "@/features/identity";
+import { useApiErrorToast } from "@/shared/api/errors";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/ui/dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form";
+import { Input } from "@/shared/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
 export default function AdminUsersPage() {
   const t = useTranslations();
+  const onError = useApiErrorToast();
   const me = useMe();
-  const call = useApi();
-  const queryClient = useQueryClient();
+  const isAdmin = !!me.data?.roles.includes("ADMIN");
+  const users = useStaff(isAdmin);
+  const create = useCreateStaff();
   const [open, setOpen] = useState(false);
-
-  const users = useQuery({
-    queryKey: ["admin", "users"],
-    queryFn: () => call<Person[]>("/api/admin/users"),
-    enabled: !!me.data?.roles.includes("ADMIN"),
-  });
 
   const schema = z.object({
     email: z.string().trim().email(t("validation.email")),
@@ -47,24 +33,22 @@ export default function AdminUsersPage() {
     temporaryPassword: z.string().min(8, t("validation.minLength", { min: 8 })).max(64),
   });
   type Values = z.infer<typeof schema>;
-
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", firstName: "", lastName: "", type: "LAB", temporaryPassword: "" },
   });
 
-  const create = useMutation({
-    mutationFn: (values: Values) => call<Person>("/api/admin/users", { method: "POST", body: JSON.stringify(values) }),
-    onSuccess: () => {
-      toast.success(t("adminUsers.created"));
-      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      form.reset();
-      setOpen(false);
-    },
-    onError: (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message),
-  });
+  const submit = (values: Values) =>
+    create.mutate(values, {
+      onSuccess: () => {
+        toast.success(t("adminUsers.created"));
+        form.reset();
+        setOpen(false);
+      },
+      onError,
+    });
 
-  if (!me.data?.roles.includes("ADMIN")) return <p className="text-destructive">{t("errors.forbidden")}</p>;
+  if (!isAdmin) return <p className="text-destructive">{t("errors.forbidden")}</p>;
 
   return (
     <div className="space-y-6">
@@ -81,7 +65,7 @@ export default function AdminUsersPage() {
               <DialogDescription>{t("adminUsers.subtitle")}</DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
+              <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="email"
@@ -129,11 +113,7 @@ export default function AdminUsersPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("adminUsers.role")}</FormLabel>
-                      <Select
-                        items={Object.fromEntries(STAFF_TYPES.map((type) => [type, t(`roles.${type}`)]))}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
+                      <Select items={Object.fromEntries(STAFF_TYPES.map((type) => [type, t(`roles.${type}`)]))} value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />
@@ -204,9 +184,7 @@ export default function AdminUsersPage() {
               <TableCell>{u.email}</TableCell>
               <TableCell>{t(`roles.${u.type}`)}</TableCell>
               <TableCell>
-                <Badge variant={u.active ? "default" : "secondary"}>
-                  {u.active ? t("adminUsers.active") : t("adminUsers.inactive")}
-                </Badge>
+                <Badge variant={u.active ? "default" : "secondary"}>{u.active ? t("adminUsers.active") : t("adminUsers.inactive")}</Badge>
               </TableCell>
             </TableRow>
           ))}

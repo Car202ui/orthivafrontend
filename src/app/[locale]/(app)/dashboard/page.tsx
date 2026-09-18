@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMe } from "@/lib/query";
+import { useMe } from "@/features/identity";
+import { Link } from "@/shared/i18n/navigation";
+import { Badge } from "@/shared/ui/badge";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 
 type Tile = { href: string; title: string; description: string; ready: boolean };
+const DOMAIN_ROLES = ["ADMIN", "DOCTOR", "PATIENT", "LAB", "PLANNER", "PRODUCTION", "ACCOUNTING", "REPRESENTATIVE"];
 
 export default function DashboardPage() {
   const t = useTranslations();
@@ -37,9 +38,7 @@ export default function DashboardPage() {
   if (roles.includes("PATIENT")) {
     sections.push({
       title: t("dashboard.patient.title"),
-      tiles: [
-        { href: "/patient/treatment", title: t("nav.myTreatment"), description: t("dashboard.patient.treatment"), ready: true },
-      ],
+      tiles: [{ href: "/patient/treatment", title: t("nav.myTreatment"), description: t("dashboard.patient.treatment"), ready: true }],
     });
   }
   if (roles.includes("ADMIN")) {
@@ -58,7 +57,8 @@ export default function DashboardPage() {
         <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
           <span>
             {t("dashboard.roleLabel")}:{" "}
-            {roles.filter((r) => r in { ADMIN: 1, DOCTOR: 1, PATIENT: 1, LAB: 1, PLANNER: 1, PRODUCTION: 1, ACCOUNTING: 1, REPRESENTATIVE: 1 })
+            {roles
+              .filter((r) => DOMAIN_ROLES.includes(r))
               .map((r) => (
                 <Badge key={r} variant="secondary" className="mr-1">
                   {t(`roles.${r}`)}

@@ -1,20 +1,18 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { PatientForm } from "@/components/forms/patient-form";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Link } from "@/i18n/navigation";
-import { OrderStatusBadge } from "@/components/orders/status-badge";
-import { ApiError, type Order, type Patient, type PatientInput } from "@/lib/api";
-import { parseLocalDate } from "@/lib/dates";
-import { useApi } from "@/lib/query";
+import { OrderStatusBadge, useOrders } from "@/features/orders";
+import { PatientForm, usePatient, useUpdatePatient, type PatientInput } from "@/features/patients";
+import { useApiErrorToast } from "@/shared/api/errors";
+import { Link } from "@/shared/i18n/navigation";
+import { parseLocalDate } from "@/shared/lib/dates";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 
 function age(birthDate: string | null): number | null {
   if (!birthDate) return null;
@@ -27,23 +25,22 @@ function age(birthDate: string | null): number | null {
 
 export default function PatientRecordPage() {
   const t = useTranslations();
+  const onError = useApiErrorToast();
   const { id } = useParams<{ id: string }>();
-  const call = useApi();
-  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
 
-  const patient = useQuery({ queryKey: ["patients", "one", id], queryFn: () => call<Patient>(`/api/patients/${id}`) });
-  const orders = useQuery({ queryKey: ["orders", "patient", id], queryFn: () => call<Order[]>(`/api/orders?patientId=${id}`) });
+  const patient = usePatient(id);
+  const orders = useOrders({ patientId: id });
+  const update = useUpdatePatient(id);
 
-  const update = useMutation({
-    mutationFn: (input: PatientInput) => call<Patient>(`/api/patients/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-    onSuccess: () => {
-      toast.success(t("patients.updated"));
-      setEditing(false);
-      queryClient.invalidateQueries({ queryKey: ["patients"] });
-    },
-    onError: (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message),
-  });
+  const submit = (input: PatientInput) =>
+    update.mutate(input, {
+      onSuccess: () => {
+        toast.success(t("patients.updated"));
+        setEditing(false);
+      },
+      onError,
+    });
 
   if (patient.isError) return <p className="text-destructive">{t("patients.notFound")}</p>;
   const p = patient.data;
@@ -118,7 +115,7 @@ export default function PatientRecordPage() {
           <DialogHeader>
             <DialogTitle>{t("patients.edit")}</DialogTitle>
           </DialogHeader>
-          <PatientForm initial={p} onSubmit={(input) => update.mutate(input)} onCancel={() => setEditing(false)} pending={update.isPending} />
+          <PatientForm initial={p} onSubmit={submit} onCancel={() => setEditing(false)} pending={update.isPending} />
         </DialogContent>
       </Dialog>
     </div>

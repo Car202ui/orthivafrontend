@@ -3,10 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Toaster } from "@/components/ui/sonner";
-import { routing } from "@/i18n/routing";
-import { OrthivaAuthProvider } from "@/lib/auth";
-import { OrthivaQueryProvider } from "@/lib/query";
+import { Toaster } from "@/shared/ui/sonner";
+import { routing } from "@/shared/i18n/routing";
+import { OrthivaAuthProvider } from "@/shared/auth/provider";
+import { OrthivaQueryProvider } from "@/shared/query/provider";
 import "../globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });

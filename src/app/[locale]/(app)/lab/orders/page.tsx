@@ -1,14 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
-import { OrderStatusBadge } from "@/components/orders/status-badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Link } from "@/i18n/navigation";
-import { ORDER_STATUSES, type Order, type OrderStatus } from "@/lib/api";
-import { useApi } from "@/lib/query";
+import { ORDER_STATUSES, OrderStatusBadge, useOrders, type OrderStatus } from "@/features/orders";
+import { Link } from "@/shared/i18n/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
 const ALL = "__all__";
 const PENDING = "__pending__";
@@ -18,19 +15,12 @@ const PENDING_STATUSES: OrderStatus[] = ["DIAGNOSIS_PAID", "IN_PLANNING", "CHANG
 export default function LabOrdersPage() {
   const t = useTranslations();
   const format = useFormatter();
-  const call = useApi();
   const [filter, setFilter] = useState<string>(PENDING);
 
-  const orders = useQuery({
-    queryKey: ["orders", "lab", filter],
-    queryFn: async () => {
-      if (filter === PENDING) {
-        const all = await call<Order[]>("/api/orders");
-        return all.filter((o) => PENDING_STATUSES.includes(o.status));
-      }
-      return call<Order[]>(`/api/orders${filter === ALL ? "" : `?status=${filter}`}`);
-    },
-  });
+  // "Pending" spans several statuses: fetch everything and filter client-side.
+  const isStatus = filter !== ALL && filter !== PENDING;
+  const orders = useOrders({ status: isStatus ? (filter as OrderStatus) : null });
+  const rows = filter === PENDING ? orders.data?.filter((o) => PENDING_STATUSES.includes(o.status)) : orders.data;
 
   return (
     <div className="space-y-6">
@@ -74,14 +64,14 @@ export default function LabOrdersPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {orders.data?.length === 0 && (
+          {rows?.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="text-center text-muted-foreground">
                 {t("orders.empty")}
               </TableCell>
             </TableRow>
           )}
-          {orders.data?.map((o) => (
+          {rows?.map((o) => (
             <TableRow key={o.id}>
               <TableCell className="font-medium">
                 <Link href={`/lab/orders/${o.id}`} className="hover:underline">
