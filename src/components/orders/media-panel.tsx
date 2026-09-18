@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ApiError, PRESCRIPTION_KINDS, type Media, type MediaKind } from "@/lib/api";
+import { ApiError, PRESCRIPTION_KINDS, type KindGroup, type Media, type MediaKind } from "@/lib/api";
 import { useApi } from "@/lib/query";
 
 function formatBytes(n: number) {
@@ -15,21 +15,42 @@ function formatBytes(n: number) {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-/** Gallery + (optionally) uploader for an order's files. */
-export function MediaPanel({ orderId, media, editable }: { orderId: string; media: Media[]; editable: boolean }) {
+/**
+ * Gallery + (optionally) uploader for any owner's files. `basePath` is the owner's
+ * endpoint (e.g. /api/orders/{id} or /api/plans/{id}); uploads go to `${basePath}/media`.
+ */
+export function MediaPanel({
+  basePath,
+  media,
+  editable,
+  kindGroups = PRESCRIPTION_KINDS,
+  kindLabel,
+  groupLabel,
+  invalidate,
+}: {
+  basePath: string;
+  media: Media[];
+  editable: boolean;
+  kindGroups?: KindGroup[];
+  kindLabel?: (kind: MediaKind) => string;
+  groupLabel?: (group: string) => string;
+  invalidate: readonly unknown[][];
+}) {
   const t = useTranslations();
   const call = useApi();
   const queryClient = useQueryClient();
-  const [kind, setKind] = useState<MediaKind>("PHOTO_FRONTAL");
+  const label = kindLabel ?? ((k: MediaKind) => t(`orders.kinds.${k}`));
+  const gLabel = groupLabel ?? ((g: string) => t(`orders.media.${g}`));
+  const [kind, setKind] = useState<MediaKind>(kindGroups[0].kinds[0]);
   const fileRef = useRef<HTMLInputElement>(null);
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["orders", "one", orderId] });
+  const refresh = () => invalidate.forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
   const onError = (e: ApiError) => toast.error(e.code ? t(`errors.${e.code}`) : e.message);
 
   const upload = useMutation({
     mutationFn: async (file: File) => {
       const body = new FormData();
       body.append("file", file);
-      return call<Media>(`/api/orders/${orderId}/media?kind=${kind}`, { method: "POST", body });
+      return call<Media>(`${basePath}/media?kind=${kind}`, { method: "POST", body });
     },
     onSuccess: () => {
       toast.success(t("orders.media.uploaded"));
@@ -40,7 +61,7 @@ export function MediaPanel({ orderId, media, editable }: { orderId: string; medi
   });
 
   const remove = useMutation({
-    mutationFn: (mediaId: string) => call<void>(`/api/orders/${orderId}/media/${mediaId}`, { method: "DELETE" }),
+    mutationFn: (mediaId: string) => call<void>(`${basePath}/media/${mediaId}`, { method: "DELETE" }),
     onSuccess: () => {
       toast.success(t("orders.media.deleted"));
       refresh();
@@ -56,20 +77,20 @@ export function MediaPanel({ orderId, media, editable }: { orderId: string; medi
             <div className="min-w-[220px]">
               <label className="mb-1 block text-xs font-medium">{t("orders.media.kind")}</label>
               <Select
-                items={Object.fromEntries(PRESCRIPTION_KINDS.flatMap((g) => g.kinds.map((k) => [k, t(`orders.kinds.${k}`)])))}
+                items={Object.fromEntries(kindGroups.flatMap((g) => g.kinds.map((k) => [k, label(k)])))}
                 value={kind}
-                onValueChange={(v) => setKind((v ?? "PHOTO_FRONTAL") as MediaKind)}
+                onValueChange={(v) => setKind((v ?? kindGroups[0].kinds[0]) as MediaKind)}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {PRESCRIPTION_KINDS.map((g) => (
+                  {kindGroups.map((g) => (
                     <SelectGroup key={g.group}>
-                      <SelectLabel>{t(`orders.media.${g.group}`)}</SelectLabel>
+                      <SelectLabel>{gLabel(g.group)}</SelectLabel>
                       {g.kinds.map((k) => (
                         <SelectItem key={k} value={k}>
-                          {t(`orders.kinds.${k}`)}
+                          {label(k)}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -109,7 +130,7 @@ export function MediaPanel({ orderId, media, editable }: { orderId: string; medi
               )}
             </a>
             <div className="space-y-1 p-2 text-xs">
-              <p className="font-medium">{t(`orders.kinds.${m.kind}`)}</p>
+              <p className="font-medium">{label(m.kind)}</p>
               <p className="truncate text-muted-foreground" title={m.fileName}>
                 {m.fileName} · {formatBytes(m.sizeBytes)}
                 {m.widthPx ? ` · ${m.widthPx}×${m.heightPx}` : ""}

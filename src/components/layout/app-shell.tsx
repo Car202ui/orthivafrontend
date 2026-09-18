@@ -32,7 +32,7 @@ function navFor(roles: string[]): NavItem[] {
     );
   }
   if (roles.some((r) => ["LAB", "PLANNER"].includes(r))) {
-    items.push({ href: "/lab/orders", labelKey: "labOrders", ready: false });
+    items.push({ href: "/lab/orders", labelKey: "labOrders", ready: true });
   }
   if (roles.some((r) => ["LAB", "PRODUCTION"].includes(r))) {
     items.push({ href: "/lab/production", labelKey: "production", ready: false });
