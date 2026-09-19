@@ -1,25 +1,41 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { api } from "@/shared/api/client";
 import { useApi } from "@/shared/query/provider";
-import type { Payment } from "./types";
+import type { CheckoutSession, Payment } from "./types";
 
 export const paymentsKey = (orderId: string) => ["payments", orderId] as const;
+export const paymentKey = (id: string) => ["payments", "one", id] as const;
 
 export function usePayments(orderId: string) {
   const call = useApi();
   return useQuery({ queryKey: paymentsKey(orderId), queryFn: () => call<Payment[]>(`/api/payments?orderId=${orderId}`) });
 }
 
-/** Dev mock gateway until 1.6 wires Wompi. Invalidates the order too (its status advances). */
-export function useMockPay(orderId: string) {
+/** One payment; with `poll` the return page keeps asking until the provider's webhook lands. */
+export function usePayment(id: string, options: { poll?: boolean } = {}) {
   const call = useApi();
-  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: paymentKey(id),
+    queryFn: () => call<Payment>(`/api/payments/${id}`),
+    refetchInterval: options.poll ? (query) => (query.state.data?.status === "PENDING" ? 2000 : false) : false,
+  });
+}
+
+/** Opens a checkout at the active gateway (Wompi, or the dev Mock page) and returns the URL to redirect to. */
+export function useCheckout() {
+  const call = useApi();
   return useMutation({
-    mutationFn: (paymentId: string) => call<Payment>(`/api/payments/${paymentId}/mock-approve`, { method: "POST" }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: paymentsKey(orderId) });
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
+    mutationFn: ({ paymentId, returnUrl }: { paymentId: string; returnUrl: string }) =>
+      call<CheckoutSession>(`/api/payments/${paymentId}/checkout`, { method: "POST", body: JSON.stringify({ returnUrl }) }),
+  });
+}
+
+/** Dev Mock gateway page: reports the tester's decision to the core. Public endpoint, no token. */
+export function useMockWebhook() {
+  return useMutation({
+    mutationFn: ({ reference, status }: { reference: string; status: "APPROVED" | "DECLINED" }) =>
+      api<{ status: string }>("/api/payments/webhooks/mock", undefined, { method: "POST", body: JSON.stringify({ reference, status }) }),
   });
 }

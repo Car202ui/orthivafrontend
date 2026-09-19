@@ -1,9 +1,11 @@
+export type PaymentStatus = "PENDING" | "APPROVED" | "DECLINED" | "REFUNDED" | "ERROR";
+
 export type Payment = {
   id: string;
   orderId: string;
   planId: string | null;
   purpose: "DIAGNOSIS" | "TREATMENT";
-  status: "PENDING" | "APPROVED" | "DECLINED" | "REFUNDED" | "ERROR";
+  status: PaymentStatus;
   amount: number;
   currency: string;
   gateway: string;
@@ -11,3 +13,6 @@ export type Payment = {
   paidAt: string | null;
   createdAt: string;
 };
+
+/** Where the core sends the payer after POST /api/payments/{id}/checkout. */
+export type CheckoutSession = { paymentId: string; gateway: string; reference: string; checkoutUrl: string };

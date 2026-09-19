@@ -58,4 +58,5 @@ Reglas: `app/` importa `@/features/<x>` (solo su `index.ts`) y `@/shared/*`; una
 - **Fase 1.3** ✅ prescripciones: formulario con movimientos por diente, carga de archivos con miniaturas, envío al laboratorio, línea de tiempo y pagos.
 - **Fase 1.4** ✅ laboratorio: bandeja, plan de tratamiento (etapas, precios, imágenes 3D/PDF/STL) y envío al doctor; pago simulado en desarrollo.
 - **Fase 1.5** ✅ revisión del plan por el doctor: comentarios (pedir cambios), aprobación con dirección de envío y acuerdo de responsabilidad, rechazo; hilo visible para el laboratorio; el paciente ve su plan aprobado.
-- Siguientes: 1.6 pagos (Mock + Wompi) · 1.7 producción y seguimiento · 1.8 notificaciones · 1.9 calidad.
+- **Fase 1.6** ✅ pagos: `/doctor/payments/[id]` (resumen + «Pagar» → checkout de la pasarela por redirección), `/doctor/payments/[id]/return` (espera la confirmación del webhook), `/pay/mock/[reference]` (simulador de pasarela para desarrollo).
+- Siguientes: 1.7 producción y seguimiento · 1.8 notificaciones · 1.9 calidad.

@@ -267,7 +267,6 @@
     "paymentPurpose": { "DIAGNOSIS": "Diagnóstico digital", "TREATMENT": "Tratamiento" },
     "paymentStatus": { "PENDING": "Pendiente", "APPROVED": "Pagado", "DECLINED": "Rechazado", "REFUNDED": "Reembolsado", "ERROR": "Error" },
     "payNow": "Pagar",
-    "paySoon": "El pago en línea se habilita en la entrega 1.6.",
     "details": "Detalle de la prescripción",
     "noMovements": "Sin movimientos específicos.",
     "created": "Creada"
@@ -331,6 +330,36 @@
     "treatmentSoon": "Tu plan de tratamiento aparecerá aquí cuando el laboratorio lo publique.",
     "treatment": "Tratamiento",
     "planPending": "Tu doctor y el laboratorio están preparando tu plan. Lo verás aquí cuando sea aprobado."
+  },
+  "payments": {
+    "title": "Pago",
+    "cardHint": "Los pagos se realizan en línea a través de la pasarela del laboratorio.",
+    "none": "Esta orden aún no tiene cobros.",
+    "viaGateway": "Pago confirmado por la pasarela.",
+    "notFound": "Pago no encontrado.",
+    "amount": "Monto",
+    "created": "Generado",
+    "paidAt": "Pagado el",
+    "gateway": "Pasarela",
+    "reference": "Referencia",
+    "checkoutHint": "Serás redirigido a la pasarela de pago segura. Al terminar volverás a Orthiva.",
+    "payButton": "Pagar {amount}",
+    "backToOrder": "Volver a la orden",
+    "retry": "Intentar de nuevo",
+    "return": {
+      "PENDING": { "title": "Confirmando tu pago…", "body": "Estamos esperando la confirmación de la pasarela. Esta página se actualiza sola." },
+      "APPROVED": { "title": "Pago aprobado", "body": "Tu pago fue confirmado y la orden avanzó automáticamente." },
+      "DECLINED": { "title": "Pago rechazado", "body": "La pasarela rechazó la transacción. Puedes intentarlo de nuevo con otro medio de pago." },
+      "ERROR": { "title": "Error en el pago", "body": "Ocurrió un error en la pasarela. Puedes intentarlo de nuevo." },
+      "REFUNDED": { "title": "Pago reembolsado", "body": "Este pago fue reembolsado." }
+    },
+    "mock": {
+      "title": "Pasarela de pruebas",
+      "subtitle": "Simulador de pago para desarrollo: elige el resultado de la transacción.",
+      "reference": "Referencia",
+      "approve": "Aprobar pago",
+      "decline": "Rechazar pago"
+    }
   },
   "review": {
     "comments": "Comentarios",

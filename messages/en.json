@@ -267,7 +267,6 @@
     "paymentPurpose": { "DIAGNOSIS": "Digital diagnosis", "TREATMENT": "Treatment" },
     "paymentStatus": { "PENDING": "Pending", "APPROVED": "Paid", "DECLINED": "Declined", "REFUNDED": "Refunded", "ERROR": "Error" },
     "payNow": "Pay",
-    "paySoon": "Online payment arrives in delivery 1.6.",
     "details": "Prescription details",
     "noMovements": "No specific movements.",
     "created": "Created"
@@ -331,6 +330,36 @@
     "treatmentSoon": "Your treatment plan will appear here once the laboratory publishes it.",
     "treatment": "Treatment",
     "planPending": "Your doctor and the laboratory are preparing your plan. You will see it here once it is approved."
+  },
+  "payments": {
+    "title": "Payment",
+    "cardHint": "Payments are made online through the laboratory's gateway.",
+    "none": "This order has no charges yet.",
+    "viaGateway": "Payment confirmed by the gateway.",
+    "notFound": "Payment not found.",
+    "amount": "Amount",
+    "created": "Created",
+    "paidAt": "Paid on",
+    "gateway": "Gateway",
+    "reference": "Reference",
+    "checkoutHint": "You will be redirected to the secure payment gateway and brought back to Orthiva afterwards.",
+    "payButton": "Pay {amount}",
+    "backToOrder": "Back to the order",
+    "retry": "Try again",
+    "return": {
+      "PENDING": { "title": "Confirming your payment…", "body": "Waiting for the gateway's confirmation. This page refreshes by itself." },
+      "APPROVED": { "title": "Payment approved", "body": "Your payment was confirmed and the order moved forward automatically." },
+      "DECLINED": { "title": "Payment declined", "body": "The gateway declined the transaction. You can try again with another payment method." },
+      "ERROR": { "title": "Payment error", "body": "The gateway reported an error. You can try again." },
+      "REFUNDED": { "title": "Payment refunded", "body": "This payment was refunded." }
+    },
+    "mock": {
+      "title": "Test gateway",
+      "subtitle": "Development payment simulator: choose the outcome of the transaction.",
+      "reference": "Reference",
+      "approve": "Approve payment",
+      "decline": "Decline payment"
+    }
   },
   "review": {
     "comments": "Comments",

@@ -18,7 +18,7 @@ export function useOrders(params: { status?: OrderStatus | null; patientId?: str
 
 export function useOrder(id: string) {
   const call = useApi();
-  return useQuery({ queryKey: orderKey(id), queryFn: () => call<Order>(`/api/orders/${id}`) });
+  return useQuery({ queryKey: orderKey(id), queryFn: () => call<Order>(`/api/orders/${id}`), enabled: !!id });
 }
 
 function useOrderMutation<TVars>(fn: (call: ReturnType<typeof useApi>, vars: TVars) => Promise<Order>) {
