@@ -37,6 +37,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { PlanReview } from "./plan-review";
 
 export default function OrderPage() {
   const t = useTranslations();
@@ -134,6 +135,7 @@ export default function OrderPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
+            <PlanReview order={o} isDoctor={isDoctor} />
             <OrderSummary order={o} />
             {media(false)}
           </div>

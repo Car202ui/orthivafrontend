@@ -2,9 +2,10 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useMe } from "@/features/identity";
+import { OrderStatusBadge, useOrders, type Order } from "@/features/orders";
 import { useMyDoctors } from "@/features/patients";
+import { PlanDetails, PlanMedia, usePlans } from "@/features/planning";
 import { parseLocalDate } from "@/shared/lib/dates";
-import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 
 export default function PatientTreatmentPage() {
@@ -12,6 +13,9 @@ export default function PatientTreatmentPage() {
   const format = useFormatter();
   const me = useMe();
   const doctors = useMyDoctors();
+  const orders = useOrders();
+  // Terminal or draft orders carry nothing the patient needs to see.
+  const active = (orders.data ?? []).filter((o) => !["DRAFT", "CANCELLED", "REJECTED"].includes(o.status));
 
   return (
     <div className="space-y-6">
@@ -41,15 +45,51 @@ export default function PatientTreatmentPage() {
         </CardContent>
       </Card>
 
-      <Card className="opacity-70">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            {t("nav.myTreatment")}
-            <Badge variant="outline">{t("app.comingSoon")}</Badge>
-          </CardTitle>
-          <CardDescription>{t("portal.treatmentSoon")}</CardDescription>
-        </CardHeader>
-      </Card>
+      {orders.data && active.length === 0 && (
+        <Card className="opacity-70">
+          <CardHeader>
+            <CardTitle>{t("nav.myTreatment")}</CardTitle>
+            <CardDescription>{t("portal.treatmentSoon")}</CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+      {active.map((o) => (
+        <PatientOrderCard key={o.id} order={o} />
+      ))}
     </div>
+  );
+}
+
+/** One treatment as the patient sees it: status, doctor and, once approved, the plan. */
+function PatientOrderCard({ order }: { order: Order }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const plans = usePlans(order.id);
+  const approved = plans.data?.find((p) => p.approval) ?? null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+          <span>
+            {t("portal.treatment")} #{order.orderNumber} · {t(`orders.form.arch${order.arch}`)}
+          </span>
+          <OrderStatusBadge status={order.status} />
+        </CardTitle>
+        <CardDescription>
+          {order.doctorName} · {format.dateTime(new Date(order.createdAt), { dateStyle: "medium" })}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {approved ? (
+          <>
+            <PlanDetails plan={approved} showApproval={false} />
+            <PlanMedia plan={approved} editable={false} />
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("portal.planPending")}</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

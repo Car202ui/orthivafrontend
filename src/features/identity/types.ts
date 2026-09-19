@@ -43,7 +43,7 @@ export type Me = {
   roles: string[];
   onboardingRequired: boolean;
   person: Person | null;
-  tenant: { id: string; name: string; currency: string; diagnosisPrice: number } | null;
+  tenant: { id: string; name: string; currency: string; diagnosisPrice: number; agreementText: string | null } | null;
 };
 
 export type ProfileInput = {

@@ -1,6 +1,21 @@
+import type { Address } from "@/shared/api/common";
 import type { KindGroup, Media } from "@/shared/media/types";
 
 export type Stage = { id?: string; stageNumber: number; arch: "UPPER" | "LOWER"; description?: string | null; cost?: number | null };
+
+export type PlanComment = { id: string; authorId: string; authorName: string | null; body: string; createdAt: string };
+
+/** Snapshot taken when the doctor approved: shipping target + the agreement text accepted. */
+export type PlanApproval = {
+  id: string;
+  approvedBy: string;
+  approvedByName: string | null;
+  shipToClinicName: string;
+  shipAddress: Address;
+  shippingInstructions: string | null;
+  agreementText: string;
+  approvedAt: string;
+};
 
 export type Plan = {
   id: string;
@@ -23,6 +38,8 @@ export type Plan = {
   updatedAt: string;
   stages: Stage[];
   media: Media[];
+  comments: PlanComment[];
+  approval: PlanApproval | null;
 };
 
 export type PlanInput = {
@@ -34,6 +51,13 @@ export type PlanInput = {
   priceLower?: number | null;
   priceTotal?: number | null;
   stages: Stage[];
+};
+
+export type ApprovalInput = {
+  shipToClinicName: string;
+  address: Address;
+  shippingInstructions?: string;
+  agreementAccepted: boolean;
 };
 
 /** File kinds the lab attaches to a plan, grouped for the uploader. */

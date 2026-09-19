@@ -5,11 +5,22 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { OrderStatusBadge, OrderSummary, OrderTimeline, orderKey, PRESCRIPTION_KINDS, useOrder, type OrderStatus } from "@/features/orders";
-import { PLAN_KINDS, PlanForm, plansKey, usePlans, useSavePlan, useSendPlan, useStartPlanning, type Plan, type PlanInput } from "@/features/planning";
+import {
+  PlanComments,
+  PlanDetails,
+  PlanForm,
+  PlanMedia,
+  useCommentPlan,
+  usePlans,
+  useSavePlan,
+  useSendPlan,
+  useStartPlanning,
+  type Plan,
+  type PlanInput,
+} from "@/features/planning";
 import { useApiErrorToast } from "@/shared/api/errors";
 import { Link } from "@/shared/i18n/navigation";
 import { MediaPanel } from "@/shared/media/media-panel";
-import type { MediaKind } from "@/shared/media/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +48,7 @@ export default function LabOrderPage() {
   const start = useStartPlanning(id);
   const save = useSavePlan(id);
   const send = useSendPlan(id);
+  const comment = useCommentPlan(id);
   const onError = useApiErrorToast();
 
   const savePlan = (planId: string) => (input: PlanInput) =>
@@ -50,25 +62,14 @@ export default function LabOrderPage() {
       },
       onError,
     });
+  const reply = (planId: string) => (body: string) =>
+    comment.mutate({ planId, body }, { onSuccess: () => toast.success(t("review.commentPosted")), onError });
 
   if (order.isError) return <p className="text-destructive">{t("orders.notFound")}</p>;
   const o = order.data;
   if (!o) return null;
   const draft = plans.data?.find((p) => !p.sent) ?? null;
-  const sentPlans = plans.data?.filter((p) => p.sent) ?? [];
-  const kindLabel = (k: MediaKind) => t(`lab.kinds.${k}`);
-  const groupLabel = (g: string) => (g === "other" ? t("orders.media.other") : g === "model3d" ? "3D" : t("orders.arch"));
-  const planMedia = (plan: Plan, editable: boolean) => (
-    <MediaPanel
-      basePath={`/api/plans/${plan.id}`}
-      media={plan.media}
-      editable={editable}
-      kindGroups={PLAN_KINDS}
-      kindLabel={kindLabel}
-      groupLabel={groupLabel}
-      invalidate={[plansKey(id)]}
-    />
-  );
+  const sentPlans = (plans.data?.filter((p) => p.sent) ?? []).sort((a, b) => b.version - a.version);
 
   return (
     <div className="space-y-6">
@@ -127,7 +128,7 @@ export default function LabOrderPage() {
                 <div>
                   <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("lab.planMedia")}</h3>
                   <p className="mb-3 text-xs text-muted-foreground">{t("lab.planMediaHint")}</p>
-                  {planMedia(draft, true)}
+                  <PlanMedia plan={draft} editable />
                 </div>
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <span className="text-sm">
@@ -141,32 +142,29 @@ export default function LabOrderPage() {
             </Card>
           )}
 
-          {sentPlans.map((p) => (
+          {sentPlans.map((p, i) => (
             <Card key={p.id}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   {t("lab.planTitle")} · {t("lab.planVersion", { version: p.version })}
-                  <Badge>{t("lab.planSent")}</Badge>
+                  {p.approval ? (
+                    <Badge>{t("review.approved")}</Badge>
+                  ) : i === 0 && o.status === "CHANGES_REQUESTED" ? (
+                    <Badge variant="secondary">{t("orders.statuses.CHANGES_REQUESTED")}</Badge>
+                  ) : i === 0 && o.status === "REJECTED" ? (
+                    <Badge variant="destructive">{t("orders.statuses.REJECTED")}</Badge>
+                  ) : (
+                    <Badge variant="outline">{i === 0 ? t("lab.planSent") : t("review.superseded")}</Badge>
+                  )}
                 </CardTitle>
                 <CardDescription>
                   {p.plannerName} · {p.sentAt && format.dateTime(new Date(p.sentAt), { dateStyle: "medium", timeStyle: "short" })}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <p>
-                  <span className="text-muted-foreground">{t("lab.diagnosis")}:</span> {p.diagnosis || "—"}
-                </p>
-                <p>
-                  <span className="text-muted-foreground">{t("lab.upperStages")}:</span> {p.upperStages ?? "—"} ·{" "}
-                  <span className="text-muted-foreground">{t("lab.lowerStages")}:</span> {p.lowerStages ?? "—"}
-                </p>
-                <p>
-                  <span className="text-muted-foreground">{t("lab.priceTotal")}:</span>{" "}
-                  <strong>
-                    {format.number(p.priceTotal ?? 0)} {p.currency}
-                  </strong>
-                </p>
-                {planMedia(p, false)}
+              <CardContent className="space-y-5">
+                <PlanDetails plan={p} />
+                <PlanMedia plan={p} editable={false} />
+                <PlanComments plan={p} onPost={reply(p.id)} postLabel={t("review.reply")} pending={comment.isPending} />
               </CardContent>
             </Card>
           ))}
