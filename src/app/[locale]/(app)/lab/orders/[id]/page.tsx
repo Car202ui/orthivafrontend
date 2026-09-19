@@ -4,7 +4,8 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { OrderStatusBadge, OrderSummary, OrderTimeline, orderKey, PRESCRIPTION_KINDS, useOrder, type OrderStatus } from "@/features/orders";
+import { FollowUpList, useFollowUps } from "@/features/followups";
+import { OrderStatusBadge, OrderSummary, OrderTimeline, ShipmentCard, orderKey, PRESCRIPTION_KINDS, useOrder, type OrderStatus } from "@/features/orders";
 import {
   PlanComments,
   PlanDetails,
@@ -45,6 +46,7 @@ export default function LabOrderPage() {
 
   const order = useOrder(id);
   const plans = usePlans(id);
+  const followUps = useFollowUps(id);
   const start = useStartPlanning(id);
   const save = useSavePlan(id);
   const send = useSendPlan(id);
@@ -104,10 +106,21 @@ export default function LabOrderPage() {
               <MediaPanel basePath={`/api/orders/${o.id}`} media={o.media} editable={false} kindGroups={PRESCRIPTION_KINDS} invalidate={[orderKey(id)]} />
             </CardContent>
           </Card>
+          {o.shipment && <ShipmentCard shipment={o.shipment} />}
           <OrderTimeline order={o} />
         </div>
 
         <div className="space-y-6">
+          {["SHIPPED", "IN_FOLLOW_UP", "CLOSED"].includes(o.status) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("followUps.title")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FollowUpList followUps={followUps.data ?? []} editable={false} />
+              </CardContent>
+            </Card>
+          )}
           {o.status === "SUBMITTED" && (
             <Card>
               <CardContent className="pt-6 text-sm text-muted-foreground">{t("lab.waitingPayment")}</CardContent>

@@ -12,7 +12,9 @@
     "actions": "Acciones",
     "comingSoon": "Próximamente",
     "error": "Ocurrió un error",
-    "saved": "Cambios guardados"
+    "saved": "Cambios guardados",
+    "edit": "Editar",
+    "delete": "Eliminar"
   },
   "auth": {
     "signIn": "Ingresar",
@@ -329,7 +331,8 @@
     "since": "Desde {date}",
     "treatmentSoon": "Tu plan de tratamiento aparecerá aquí cuando el laboratorio lo publique.",
     "treatment": "Tratamiento",
-    "planPending": "Tu doctor y el laboratorio están preparando tu plan. Lo verás aquí cuando sea aprobado."
+    "planPending": "Tu doctor y el laboratorio están preparando tu plan. Lo verás aquí cuando sea aprobado.",
+    "evolution": "Evolución del tratamiento"
   },
   "payments": {
     "title": "Pago",
@@ -397,7 +400,53 @@
     "required": "Este campo es obligatorio",
     "email": "Correo inválido",
     "minLength": "Mínimo {min} caracteres",
-    "country": "Usa el código de dos letras (CO, MX, US…)"
+    "country": "Usa el código de dos letras (CO, MX, US…)",
+    "minValue": "Mínimo {min}"
+  },
+  "production": {
+    "title": "Producción y envíos",
+    "subtitle": "Órdenes pagadas listas para fabricar y órdenes en producción por despachar.",
+    "queue": "Cola de producción",
+    "toProduce": "Por fabricar",
+    "inProduction": "En producción",
+    "shipped": "Enviadas recientemente",
+    "empty": "No hay órdenes en esta etapa.",
+    "start": "Iniciar producción",
+    "started": "Producción iniciada",
+    "ship": "Registrar envío",
+    "shipTitle": "Registrar envío de la orden #{number}",
+    "shipBody": "La orden pasará a Enviada y el doctor verá los datos de la guía.",
+    "shipped_toast": "Envío registrado",
+    "approvedAddress": "Dirección de envío aprobada por el doctor"
+  },
+  "shipping": {
+    "title": "Envío",
+    "shippedAt": "Enviado",
+    "carrier": "Transportadora",
+    "noCarrier": "Entrega directa / sin transportadora",
+    "tracking": "Número de guía",
+    "notes": "Notas del envío"
+  },
+  "followUps": {
+    "title": "Controles del tratamiento",
+    "subtitle": "Registra cada cita de control con notas y fotos; el paciente ve su evolución.",
+    "new": "Registrar control",
+    "edit": "Editar control",
+    "visitDate": "Fecha de la cita",
+    "treatmentMonth": "Mes de tratamiento",
+    "notes": "Notas",
+    "month": "Mes {month}",
+    "empty": "Aún no hay controles registrados.",
+    "created": "Control registrado",
+    "updated": "Control actualizado",
+    "deleted": "Control eliminado",
+    "deleteTitle": "¿Eliminar este control?",
+    "deleteBody": "Se eliminará el registro y sus fotos dejarán de mostrarse.",
+    "close": "Cerrar tratamiento",
+    "closeTitle": "¿Cerrar el tratamiento?",
+    "closeBody": "La orden quedará cerrada. No podrás registrar más controles.",
+    "closed": "Tratamiento cerrado",
+    "waitingShipment": "Los controles se habilitan cuando el laboratorio envíe los alineadores."
   },
   "errors": {
     "license_required": "Los doctores deben indicar su número de licencia.",

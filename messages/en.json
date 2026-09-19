@@ -12,7 +12,9 @@
     "actions": "Actions",
     "comingSoon": "Coming soon",
     "error": "Something went wrong",
-    "saved": "Changes saved"
+    "saved": "Changes saved",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "auth": {
     "signIn": "Sign in",
@@ -329,7 +331,8 @@
     "since": "Since {date}",
     "treatmentSoon": "Your treatment plan will appear here once the laboratory publishes it.",
     "treatment": "Treatment",
-    "planPending": "Your doctor and the laboratory are preparing your plan. You will see it here once it is approved."
+    "planPending": "Your doctor and the laboratory are preparing your plan. You will see it here once it is approved.",
+    "evolution": "Treatment progress"
   },
   "payments": {
     "title": "Payment",
@@ -397,7 +400,53 @@
     "required": "This field is required",
     "email": "Invalid email",
     "minLength": "At least {min} characters",
-    "country": "Use the two-letter code (CO, MX, US…)"
+    "country": "Use the two-letter code (CO, MX, US…)",
+    "minValue": "Minimum {min}"
+  },
+  "production": {
+    "title": "Production and shipping",
+    "subtitle": "Paid orders ready to manufacture and orders in production waiting to ship.",
+    "queue": "Production queue",
+    "toProduce": "To manufacture",
+    "inProduction": "In production",
+    "shipped": "Recently shipped",
+    "empty": "No orders at this stage.",
+    "start": "Start production",
+    "started": "Production started",
+    "ship": "Record shipment",
+    "shipTitle": "Record shipment of order #{number}",
+    "shipBody": "The order becomes Shipped and the doctor sees the tracking details.",
+    "shipped_toast": "Shipment recorded",
+    "approvedAddress": "Shipping address approved by the doctor"
+  },
+  "shipping": {
+    "title": "Shipment",
+    "shippedAt": "Shipped",
+    "carrier": "Carrier",
+    "noCarrier": "Hand delivery / no carrier",
+    "tracking": "Tracking number",
+    "notes": "Shipping notes"
+  },
+  "followUps": {
+    "title": "Treatment check-ups",
+    "subtitle": "Record each control visit with notes and photos; the patient sees their progress.",
+    "new": "Record check-up",
+    "edit": "Edit check-up",
+    "visitDate": "Visit date",
+    "treatmentMonth": "Treatment month",
+    "notes": "Notes",
+    "month": "Month {month}",
+    "empty": "No check-ups recorded yet.",
+    "created": "Check-up recorded",
+    "updated": "Check-up updated",
+    "deleted": "Check-up deleted",
+    "deleteTitle": "Delete this check-up?",
+    "deleteBody": "The record is removed and its photos are no longer shown.",
+    "close": "Close treatment",
+    "closeTitle": "Close the treatment?",
+    "closeBody": "The order will be closed. No more check-ups can be recorded.",
+    "closed": "Treatment closed",
+    "waitingShipment": "Check-ups open once the laboratory ships the aligners."
   },
   "errors": {
     "license_required": "Doctors must provide a license number.",

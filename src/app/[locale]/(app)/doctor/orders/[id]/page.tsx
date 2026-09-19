@@ -11,6 +11,7 @@ import {
   OrderStatusBadge,
   OrderSummary,
   OrderTimeline,
+  ShipmentCard,
   orderKey,
   PRESCRIPTION_KINDS,
   useCancelOrder,
@@ -37,7 +38,11 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { FollowUps } from "./follow-ups";
 import { PlanReview } from "./plan-review";
+
+/** Once shipped (or closed) the check-ups become the main content of the page. */
+const IN_TREATMENT = ["SHIPPED", "IN_FOLLOW_UP", "CLOSED"];
 
 export default function OrderPage() {
   const t = useTranslations();
@@ -135,11 +140,13 @@ export default function OrderPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
+            {IN_TREATMENT.includes(o.status) && <FollowUps order={o} isDoctor={isDoctor} />}
             <PlanReview order={o} isDoctor={isDoctor} />
             <OrderSummary order={o} />
             {media(false)}
           </div>
           <div className="space-y-6">
+            {o.shipment && <ShipmentCard shipment={o.shipment} />}
             <PaymentsCard orderId={o.id} canPay={isDoctor} />
             <OrderTimeline order={o} />
           </div>

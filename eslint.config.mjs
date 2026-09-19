@@ -8,7 +8,7 @@ import nextTs from "eslint-config-next/typescript";
  *   features/ -> own files (relative) + shared. Never another feature.
  *   shared/   -> shared only. Never features or app.
  */
-const FEATURES = ["identity", "patients", "clinics", "orders", "planning", "payments"];
+const FEATURES = ["identity", "patients", "clinics", "orders", "planning", "payments", "followups"];
 
 const deepFeatureImports = {
   group: ["@/features/*/*"],

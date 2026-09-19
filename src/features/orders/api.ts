@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/shared/query/provider";
-import type { Order, OrderInput, OrderStatus } from "./types";
+import type { Order, OrderInput, OrderStatus, ShipmentInput } from "./types";
 
 export const ordersKey = ["orders"] as const;
 export const orderKey = (id: string) => [...ordersKey, "one", id] as const;
@@ -41,3 +41,14 @@ export const useSubmitOrder = (id: string) =>
 
 export const useCancelOrder = (id: string) =>
   useOrderMutation<void>((call) => call(`/api/orders/${id}/cancel`, { method: "POST", body: JSON.stringify({}) }));
+
+// ---- laboratory: production and shipping; close by doctor or lab ------------------------
+
+export const useStartProduction = (id: string) =>
+  useOrderMutation<void>((call) => call(`/api/orders/${id}/production/start`, { method: "POST" }));
+
+export const useShipOrder = (id: string) =>
+  useOrderMutation<ShipmentInput>((call, input) => call(`/api/orders/${id}/ship`, { method: "POST", body: JSON.stringify(input) }));
+
+export const useCloseOrder = (id: string) =>
+  useOrderMutation<string | undefined>((call, note) => call(`/api/orders/${id}/close`, { method: "POST", body: JSON.stringify({ note }) }));

@@ -37,7 +37,7 @@ function navFor(roles: string[]): NavItem[] {
     items.push({ href: "/lab/orders", labelKey: "labOrders", ready: true });
   }
   if (roles.some((r) => ["LAB", "PRODUCTION"].includes(r))) {
-    items.push({ href: "/lab/production", labelKey: "production", ready: false });
+    items.push({ href: "/lab/production", labelKey: "production", ready: true });
   }
   if (roles.includes("PATIENT")) {
     items.push({ href: "/patient/treatment", labelKey: "myTreatment", ready: true });

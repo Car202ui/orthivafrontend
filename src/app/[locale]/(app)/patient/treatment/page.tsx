@@ -1,8 +1,9 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
+import { FollowUpList, useFollowUps } from "@/features/followups";
 import { useMe } from "@/features/identity";
-import { OrderStatusBadge, useOrders, type Order } from "@/features/orders";
+import { OrderStatusBadge, ShipmentCard, useOrder, useOrders, type Order } from "@/features/orders";
 import { useMyDoctors } from "@/features/patients";
 import { PlanDetails, PlanMedia, usePlans } from "@/features/planning";
 import { parseLocalDate } from "@/shared/lib/dates";
@@ -65,6 +66,8 @@ function PatientOrderCard({ order }: { order: Order }) {
   const t = useTranslations();
   const format = useFormatter();
   const plans = usePlans(order.id);
+  const full = useOrder(order.id);          // the list omits the shipment
+  const followUps = useFollowUps(order.id);
   const approved = plans.data?.find((p) => p.approval) ?? null;
 
   return (
@@ -88,6 +91,13 @@ function PatientOrderCard({ order }: { order: Order }) {
           </>
         ) : (
           <p className="text-sm text-muted-foreground">{t("portal.planPending")}</p>
+        )}
+        {full.data?.shipment && <ShipmentCard shipment={full.data.shipment} />}
+        {followUps.data && followUps.data.length > 0 && (
+          <div>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("portal.evolution")}</h3>
+            <FollowUpList followUps={followUps.data} editable={false} />
+          </div>
         )}
       </CardContent>
     </Card>

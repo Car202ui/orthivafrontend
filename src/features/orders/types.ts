@@ -74,6 +74,18 @@ export type OrderHistory = {
   changedAt: string;
 };
 
+export type Shipment = {
+  id: string;
+  carrier: string | null;
+  trackingNumber: string | null;
+  notes: string | null;
+  shippedBy: string | null;
+  shippedByName: string | null;
+  shippedAt: string;
+};
+
+export type ShipmentInput = { carrier?: string; trackingNumber?: string; notes?: string };
+
 export type Order = {
   id: string;
   orderNumber: number;
@@ -95,6 +107,7 @@ export type Order = {
   movements: Movement[];
   media: Media[];
   history: OrderHistory[];
+  shipment: Shipment | null;
 };
 
 export type OrderInput = {

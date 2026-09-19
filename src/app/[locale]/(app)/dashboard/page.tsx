@@ -31,7 +31,7 @@ export default function DashboardPage() {
       title: t("dashboard.lab.title"),
       tiles: [
         { href: "/lab/orders", title: t("nav.labOrders"), description: t("dashboard.lab.orders"), ready: true },
-        { href: "/lab/production", title: t("nav.production"), description: t("dashboard.lab.production"), ready: false },
+        { href: "/lab/production", title: t("nav.production"), description: t("dashboard.lab.production"), ready: true },
       ],
     });
   }
